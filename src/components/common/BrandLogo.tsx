@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface BrandLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'horizontal' | 'stacked' | 'icon-only';
   inverted?: boolean;
   className?: string;
@@ -17,6 +17,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 }) => {
   // Dimension mappings
   const iconDimensions = {
+    xs: { w: 26, h: 26 },
     sm: { w: 32, h: 32 },
     md: { w: 42, h: 42 },
     lg: { w: 56, h: 56 },
@@ -24,6 +25,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   }[size];
 
   const textSizes = {
+    xs: { shadi: 'text-base', kabbo: 'text-[8px] tracking-[0.20em]' },
     sm: { shadi: 'text-lg', kabbo: 'text-[9px] tracking-[0.25em]' },
     md: { shadi: 'text-2xl', kabbo: 'text-[11px] tracking-[0.28em]' },
     lg: { shadi: 'text-3xl', kabbo: 'text-xs tracking-[0.32em]' },
@@ -136,7 +138,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center gap-2.5 cursor-pointer select-none ${
+      className={`inline-flex items-center ${size === 'xs' ? 'gap-1.5' : 'gap-2.5'} cursor-pointer select-none ${
         variant === 'stacked' ? 'flex-col text-center' : 'flex-row'
       } ${className}`}
     >

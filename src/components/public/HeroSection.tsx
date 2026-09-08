@@ -34,7 +34,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080] to-[#040827] text-white pt-24 pb-4 lg:pt-28 lg:pb-6 transition-all duration-300">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080] to-[#040827] text-white pt-10 pb-6 lg:pt-14 lg:pb-8 transition-all duration-300">
       {/* Dynamic Animated Shifting Background Glow & Mesh */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#030722] via-[#000080]/80 to-[#04092b] animate-color-shift pointer-events-none" />
 

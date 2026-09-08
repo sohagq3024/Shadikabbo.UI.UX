@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrandLogo } from '../common/BrandLogo';
 import { UserRole, UserAccount } from '../../types';
 import { DEMO_USERS } from '../../data/mockData';
-import { X, Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, KeyRound, Check } from 'lucide-react';
+import { X, Eye, EyeOff, Lock, Mail, ArrowRight, Sparkles } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
 interface LoginModalProps {
@@ -48,28 +48,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (onLoginSuccess) {
       onLoginSuccess(account.role, account.email);
     }
-  };
-
-  const handleInstantDemoLogin = (targetEmail: string) => {
-    const matchedAccount =
-      DEMO_USERS.find((u) => u.email.toLowerCase() === targetEmail.toLowerCase()) || DEMO_USERS[0];
-    
-    setEmail(matchedAccount.email);
-    setPassword(matchedAccount.password || 'password');
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      dispatchLogin(matchedAccount);
-      showToast('Logged In as Demo Account', `Active session: ${matchedAccount.name} (${matchedAccount.email})`, 'success');
-      onClose();
-    }, 300);
-  };
-
-  const handleQuickFill = (targetEmail: string, targetPass: string) => {
-    setEmail(targetEmail);
-    setPassword(targetPass);
-    showToast('Credentials Filled', `Auto-filled: ${targetEmail}`, 'info');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -171,151 +149,38 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-[400px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors z-10"
+          className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors z-10"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Modal Header with Official Brand Logo */}
-        <div className="pt-8 pb-4 px-6 text-center bg-gradient-to-b from-slate-50 to-white border-b border-slate-100">
+        {/* Modal Header */}
+        <div className="pt-7 pb-4 px-6 text-center">
           <div className="flex justify-center mb-3">
             <BrandLogo size="md" variant="horizontal" />
           </div>
           <h3 className="text-xl font-bold text-slate-900 font-display">
-            Welcome to Shadikabbo
+            Welcome Back
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Log in to manage your matrimonial biodata and proposals
+            Sign in to continue to your Shadikabbo account
           </p>
         </div>
 
         {/* Form Body */}
-        <div className="p-6">
-          {/* Quick Demo Credentials (Development Only) */}
-          <div className="mb-5 bg-slate-50/90 p-3 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-[#16205B]" />
-                <span className="text-[11px] font-bold text-slate-800">
-                  Development Demo Accounts
-                </span>
-              </div>
-              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                1-Click Sign In
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {/* User Account */}
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#16205B] text-slate-700 transition-all shadow-2xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                      User
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">user096</span>
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-900 truncate">user</p>
-                  <p className="text-[10px] text-slate-500 truncate font-mono">user096@gmail.com</p>
-                </div>
-                <div className="flex items-center gap-1 mt-2 pt-1.5 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickFill('user096@gmail.com', 'user096')}
-                    className="flex-1 py-1 text-[10px] font-semibold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-center"
-                    title="Fill email and password"
-                  >
-                    Fill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInstantDemoLogin('user096@gmail.com')}
-                    className="flex-1 py-1 text-[10px] font-bold rounded bg-blue-600 hover:bg-blue-700 text-white text-center"
-                    title="Instant login"
-                  >
-                    Login
-                  </button>
-                </div>
-              </div>
-
-              {/* Admin Account */}
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-600 text-slate-700 transition-all shadow-2xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
-                      Admin
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">admin096</span>
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-900 truncate">Admin</p>
-                  <p className="text-[10px] text-slate-500 truncate font-mono">admin096@gmail.com</p>
-                </div>
-                <div className="flex items-center gap-1 mt-2 pt-1.5 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickFill('admin096@gmail.com', 'admin096')}
-                    className="flex-1 py-1 text-[10px] font-semibold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-center"
-                    title="Fill email and password"
-                  >
-                    Fill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInstantDemoLogin('admin096@gmail.com')}
-                    className="flex-1 py-1 text-[10px] font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white text-center"
-                    title="Instant login"
-                  >
-                    Login
-                  </button>
-                </div>
-              </div>
-
-              {/* Super Admin Account */}
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#D91B2B] text-slate-700 transition-all shadow-2xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#D91B2B] bg-rose-50 px-1.5 py-0.5 rounded">
-                      Super Admin
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono truncate">superadmin</span>
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-900 truncate">Super admin</p>
-                  <p className="text-[10px] text-slate-500 truncate font-mono">superadmin096@gmail.com</p>
-                </div>
-                <div className="flex items-center gap-1 mt-2 pt-1.5 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickFill('superadmin096@gmail.com', 'superadmin096')}
-                    className="flex-1 py-1 text-[10px] font-semibold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-center"
-                    title="Fill email and password"
-                  >
-                    Fill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInstantDemoLogin('superadmin096@gmail.com')}
-                    className="flex-1 py-1 text-[10px] font-bold rounded bg-[#D91B2B] hover:bg-[#b91422] text-white text-center"
-                    title="Instant login"
-                  >
-                    Login
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Google SSO Button */}
+        <div className="px-6 pb-6 pt-1">
+          {/* Google Sign-In */}
           <button
             type="button"
             onClick={handleGoogleAuth}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-2xs transition-colors"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition-all"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -343,13 +208,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <div className="w-full border-t border-slate-200"></div>
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-slate-400 text-[11px] font-medium">
-                Or sign in with email
+              <span className="bg-white px-2.5 text-slate-400 text-[11px]">
+                or sign in with email
               </span>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Email Address
@@ -360,9 +225,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. user096@gmail.com"
+                  placeholder="name@example.com"
                   required
-                  className="w-full pl-10 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] text-slate-900 transition-all placeholder:text-slate-400"
+                  className="w-full pl-10 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] text-slate-900 transition-all placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -388,7 +253,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-10 pr-10 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] text-slate-900 transition-all placeholder:text-slate-400"
+                  className="w-full pl-10 pr-10 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] text-slate-900 transition-all placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -404,13 +269,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-2.5 px-4 bg-[#D91B2B] hover:bg-[#b91422] text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/20 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-[#D91B2B] to-[#b91422] hover:from-[#c21524] hover:to-[#9f0e1b] text-white text-xs font-bold rounded-xl shadow-md shadow-rose-900/20 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Log In to Account</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
@@ -418,12 +283,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </form>
 
           {/* Switch to Register */}
-          <div className="mt-5 text-center text-xs text-slate-600">
-            Don't have a matrimonial biodata yet?{' '}
+          <div className="mt-4 text-center text-xs text-slate-600">
+            Don't have an account?{' '}
             <button
               type="button"
               onClick={handleTriggerRegister}
-              className="font-bold text-[#D91B2B] hover:underline inline-flex items-center gap-0.5"
+              className="font-bold text-[#D91B2B] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
             >
               Register Free
               <Sparkles className="w-3 h-3 ml-0.5" />
@@ -433,23 +298,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
         {/* Forgot password sub-dialog */}
         {forgotModalOpen && (
-          <div className="absolute inset-0 bg-white/95 p-6 flex flex-col justify-center animate-in fade-in">
-            <h4 className="text-base font-bold text-slate-900 mb-2">Reset Your Password</h4>
-            <p className="text-xs text-slate-600 mb-4">
-              Enter your registered email address and we will send you a secure verification link to reset your password.
+          <div className="absolute inset-0 bg-white/98 p-6 flex flex-col justify-center animate-in fade-in z-20">
+            <h4 className="text-base font-bold text-slate-900 mb-1.5">Reset Your Password</h4>
+            <p className="text-xs text-slate-500 mb-4">
+              Enter your registered email address to receive a secure password reset link.
             </p>
             <input
               type="email"
               value={forgotEmail}
               onChange={(e) => setForgotEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 mb-3"
+              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 mb-3 bg-slate-50 focus:bg-white focus:outline-hidden focus:border-[#D91B2B]"
             />
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setForgotModalOpen(false)}
-                className="flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700"
+                className="flex-1 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
               >
                 Back
               </button>
@@ -459,9 +324,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setForgotModalOpen(false);
                   showToast('Reset Link Sent', `Password instructions sent to ${forgotEmail || 'your email'}.`, 'success');
                 }}
-                className="flex-1 py-2 text-xs font-bold rounded-lg bg-[#16205B] text-white"
+                className="flex-1 py-2 text-xs font-bold rounded-xl bg-[#D91B2B] text-white hover:bg-[#b91422]"
               >
-                Send Reset Link
+                Send Link
               </button>
             </div>
           </div>

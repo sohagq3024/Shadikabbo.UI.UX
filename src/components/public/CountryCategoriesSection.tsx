@@ -44,7 +44,7 @@ export const CountryCategoriesSection: React.FC<CountryCategoriesProps> = ({
   const featuredCountries = COUNTRY_CATEGORIES.slice(0, 4);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080] to-[#040827] text-white pt-4 pb-14 lg:pb-18 transition-all duration-300 -mt-1">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080] to-[#040827] text-white py-8 sm:py-10 transition-all duration-300 -mt-1">
       {/* Dynamic Animated Shifting Background Glow & Mesh - EXACT same animation as upper Hero section */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#030722] via-[#000080]/80 to-[#04092b] animate-color-shift pointer-events-none" />
 
@@ -54,8 +54,12 @@ export const CountryCategoriesSection: React.FC<CountryCategoriesProps> = ({
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 sm:mb-6 gap-3">
           <div className="max-w-3xl text-center md:text-left mx-auto md:mx-0">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] sm:text-xs font-bold mb-2.5">
+              <MapPin className="w-3 h-3" />
+              <span>Global Bengali Community</span>
+            </div>
             <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white font-display tracking-tight leading-tight">
               Find Matches by Country & Expat Community
             </h2>

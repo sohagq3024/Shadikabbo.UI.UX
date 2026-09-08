@@ -102,7 +102,12 @@ export const ProfileDiscovery: React.FC<ProfileDiscoveryProps> = ({
   };
 
   return (
-    <section id="profiles-section" className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080]/90 to-[#040827] text-white py-10 sm:py-14 transition-all duration-300 -mt-1">
+    <section
+      id="profiles-section"
+      className={`relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080]/90 to-[#040827] text-white ${
+        isHomePage ? 'py-5 sm:py-7' : 'py-8 sm:py-12'
+      } transition-all duration-300 -mt-1`}
+    >
       {/* Dynamic Animated Shifting Background Glow & Mesh matching Hero / Country sections */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#030722] via-[#000080]/80 to-[#04092b] animate-color-shift pointer-events-none" />
       <div className="absolute -top-32 right-10 w-96 h-96 bg-[#000080]/50 rounded-full blur-3xl pointer-events-none animate-glow-pulse" />
@@ -110,9 +115,9 @@ export const ProfileDiscovery: React.FC<ProfileDiscoveryProps> = ({
 
       <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-4">
+        <div className={`flex flex-col sm:flex-row sm:items-end justify-between ${isHomePage ? 'mb-3.5 sm:mb-5' : 'mb-6 sm:mb-8'} gap-3`}>
           <div className="text-center sm:text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] sm:text-xs font-bold mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] sm:text-xs font-bold mb-1.5">
               <Sparkles className="w-3 h-3" />
               <span>{isHomePage ? 'Featured Matches' : 'Verified Matrimonial Catalog'}</span>
             </div>

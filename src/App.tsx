@@ -222,7 +222,7 @@ function MatrimonialApp() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-100 selection:text-[#D91B2B]">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-100 selection:text-[#D91B2B] pb-16 lg:pb-0">
       {/* 1. Global Navbar */}
       <Navbar
         currentRole={currentRole}
@@ -252,7 +252,6 @@ function MatrimonialApp() {
                   onOpenRegister={() => setIsRegisterOpen(true)}
                   onOpenLogin={() => setIsLoginOpen(true)}
                 />
-                <CountryCategoriesSection onSelectCountry={handleSelectCountryCategory} />
                 <ProfileDiscovery
                   profiles={allProfiles.slice(0, 3)}
                   onSelectProfile={(p) => setSelectedProfile(p)}
@@ -279,6 +278,7 @@ function MatrimonialApp() {
                   onOpenLogin={() => setIsLoginOpen(true)}
                   onOpenRegister={() => setIsRegisterOpen(true)}
                 />
+                <CountryCategoriesSection onSelectCountry={handleSelectCountryCategory} />
                 <MatchmakingServicesSection
                   onOpenRegister={() => setIsRegisterOpen(true)}
                 />

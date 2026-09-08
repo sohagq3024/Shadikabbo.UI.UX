@@ -35,29 +35,44 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
   };
 
   return (
-    <section id="membership-section" className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080]/90 to-[#040827] text-white py-12 sm:py-16 transition-all duration-300 -mt-1">
+    <section id="membership-section" className="relative overflow-hidden bg-gradient-to-br from-[#02061f] via-[#000080]/90 to-[#040827] text-white py-6 sm:py-8 transition-all duration-300 -mt-1">
       {/* Dynamic Animated Shifting Background Glow & Mesh matching Hero */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#030722] via-[#000080]/80 to-[#04092b] animate-color-shift pointer-events-none" />
       <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#E60000]/20 via-rose-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 right-10 w-96 h-96 bg-[#000080]/50 rounded-full blur-3xl pointer-events-none animate-glow-pulse" />
 
       <div className="relative max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 space-y-2 sm:space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] sm:text-xs font-bold">
-            <Crown className="w-3.5 h-3.5" />
-            <span>Matrimonial Membership Plans</span>
+        {/* Section Header - Big, Bold, Luxury Premium Design */}
+        <div className="text-center max-w-4xl mx-auto mb-5 sm:mb-8 space-y-2 sm:space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/20 to-amber-500/15 border border-amber-400/35 text-amber-300 text-[11px] sm:text-xs font-bold tracking-widest uppercase shadow-lg shadow-black/20">
+            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-300 font-extrabold">
+              VIP & Premium Access
+            </span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white font-display tracking-tight leading-tight">
-            Transparent, Dignified Investment in Your Future
+
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-display tracking-tight text-white leading-tight uppercase">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2A42] via-[#FF4D61] to-[#ff7585] drop-shadow-[0_4px_24px_rgba(255,42,66,0.45)]">
+              Shadikabbo
+            </span>{' '}
+            <span className="text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+              Membership
+            </span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed px-2 sm:px-0">
-            Choose the package that aligns with your family’s search urgency with guaranteed privacy and dedicated matrimonial assistance.
+
+          <p className="text-xs sm:text-sm md:text-base font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Choose the dignified package tailored to your family's matrimonial search
           </p>
+
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+            <Gem className="w-3.5 h-3.5 text-amber-400/90" />
+            <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+          </div>
         </div>
 
         {/* 3 Luxury Membership Cards - Mobile: 3 cards in 1 line (grid-cols-3), PC: 3 columns */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-6 lg:gap-8 items-stretch pt-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-6 lg:gap-8 items-stretch pt-1.5">
           {paidPlans.map((plan) => {
             const isCurrent = currentPlanId === plan.id;
             const isPopular = plan.isPopular;
@@ -126,7 +141,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                   </p>
 
                   {/* Price */}
-                  <div className="my-2 sm:my-5">
+                  <div className="my-1.5 sm:my-3">
                     <div className="flex items-baseline gap-0.5 sm:gap-1">
                       <span
                         className={`text-xs sm:text-2xl lg:text-3xl font-extrabold tracking-tight ${
@@ -147,7 +162,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
 
                   {/* Quick Feature Highlights (Proposals & Unlocks) */}
                   <div
-                    className={`p-1.5 sm:p-3 rounded-lg sm:rounded-2xl mb-2 sm:mb-4 space-y-0.5 sm:space-y-1 text-[7px] sm:text-xs font-semibold ${
+                    className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-2xl mb-1.5 sm:mb-2.5 space-y-0.5 sm:space-y-1 text-[7px] sm:text-xs font-semibold ${
                       isPopular
                         ? 'bg-white/10 text-amber-200'
                         : isVIP
@@ -166,7 +181,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                   </div>
 
                   {/* Clean Streamlined Feature Bullets */}
-                  <ul className="space-y-1 sm:space-y-2 text-[7px] sm:text-xs">
+                  <ul className="space-y-1 sm:space-y-1.5 text-[7px] sm:text-xs">
                     {plan.features.slice(0, 4).map((feat, idx) => (
                       <li key={idx} className="flex items-center gap-1 sm:gap-1.5">
                         <Check
@@ -187,7 +202,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                 </div>
 
                 {/* Card CTA */}
-                <div className="mt-3 sm:mt-6 pt-2 sm:pt-4 border-t border-slate-100/15">
+                <div className="mt-2.5 sm:mt-4 pt-2 sm:pt-2.5 border-t border-slate-100/15">
                   {isCurrent ? (
                     <button
                       disabled
@@ -198,7 +213,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                   ) : (
                     <button
                       onClick={() => handlePlanClick(plan)}
-                      className={`w-full py-1.5 sm:py-3 rounded-lg sm:rounded-xl text-[8px] sm:text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1 ${
+                      className={`w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] sm:text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1 ${
                         isPopular
                           ? 'bg-gradient-to-r from-[#D91B2B] to-[#b91422] hover:from-[#c21524] hover:to-[#9f0e1b] text-white shadow-rose-900/40'
                           : isVIP
@@ -218,7 +233,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
         </div>
 
         {/* Corporate / Family Inquiry Callout */}
-        <div className="mt-10 sm:mt-14 bg-white/10 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-white/15 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+        <div className="mt-5 sm:mt-6 bg-white/10 backdrop-blur-md rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-white/15 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-5">
           <div className="flex items-center gap-3 sm:gap-4 text-center sm:text-left flex-col sm:flex-row">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center shrink-0">
               <PhoneCall className="w-5 h-5 sm:w-6 sm:h-6" />
