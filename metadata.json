@@ -1,0 +1,6 @@
+{
+  "name": "Shadikabbo.com - Matrimonial Platform",
+  "description": "Premium, modern and trusted matrimonial media platform connecting verified candidates worldwide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

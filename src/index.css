@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+}
+
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Luxury animations for Navbar and High-class UI */
+@keyframes navbarGlowShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes lightSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes pulseBorder {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-navbar-glow {
+  background-size: 250% 250%;
+  animation: navbarGlowShimmer 8s ease infinite;
+}
+
+.animate-light-sweep {
+  animation: lightSweep 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-pulse-border {
+  animation: pulseBorder 2.5s ease-in-out infinite;
+}
+
+/* Background Color Shifting between Navy Blue and Rich Red */
+@keyframes colorShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes waveFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+.animate-color-shift {
+  background-size: 200% 200%;
+  animation: colorShift 10s ease infinite;
+}
+
+.animate-wave-float {
+  animation: waveFloat 7s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 5s ease-in-out infinite;
+}
