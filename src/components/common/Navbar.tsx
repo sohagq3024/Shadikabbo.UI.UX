@@ -16,12 +16,14 @@ import {
   Sparkles,
   Inbox,
   UserCheck,
+  MessageSquareHeart,
 } from 'lucide-react';
 
 interface NavbarProps {
   currentRole: UserRole;
   currentUser: UserAccount | null;
   activeTab: string;
+  isRegisterOpen?: boolean;
   onNavigate?: (tab: string) => void;
   onTabChange?: (tab: string) => void;
   onOpenLogin: () => void;
@@ -34,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentRole,
   currentUser,
   activeTab,
+  isRegisterOpen = false,
   onNavigate,
   onTabChange,
   onOpenLogin,
@@ -64,19 +67,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   const getTheme = () => {
     return {
       isDark: false,
-      headerClass: isScrolled
-        ? 'bg-white/98 backdrop-blur-md border-b border-slate-200 shadow-sm shadow-slate-900/5 text-slate-800'
-        : 'bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs text-slate-800',
+      headerClass: 'bg-transparent',
+      innerClass: isScrolled
+        ? 'bg-white/98 backdrop-blur-xl border border-slate-200/90 shadow-[0_6px_25px_-3px_rgba(22,32,91,0.09),0_2px_8px_-1px_rgba(0,0,0,0.04)] text-slate-800'
+        : 'bg-white/95 backdrop-blur-xl border border-slate-200/85 shadow-[0_4px_20px_-2px_rgba(22,32,91,0.07),0_2px_8px_-1px_rgba(0,0,0,0.03)] text-slate-800',
       ambientGlow: null,
       bottomBorder: null,
       navDefault:
-        'text-slate-600 hover:text-[#D91B2B] hover:bg-slate-50 transition-all font-medium text-[13px]',
+        'text-slate-600 hover:text-[#D91B2B] hover:bg-slate-50/90 transition-all font-medium text-[13px] rounded-full',
       navActive:
-        'text-[#D91B2B] bg-rose-50/90 font-semibold border border-rose-200/60 shadow-2xs text-[13px]',
+        'text-[#D91B2B] bg-rose-50/90 font-semibold border border-rose-200/70 shadow-2xs text-[13px] rounded-full',
       loginButton:
-        'text-slate-700 hover:text-[#D91B2B] hover:bg-slate-50 hover:border-slate-300 bg-white border border-slate-200 shadow-2xs font-semibold text-xs transition-all',
+        'text-slate-700 hover:text-[#D91B2B] hover:bg-slate-50 hover:border-slate-300 bg-white border border-slate-200/90 shadow-2xs font-semibold text-xs transition-all rounded-full',
       userMenuButton:
-        'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 shadow-2xs',
+        'bg-slate-50/90 hover:bg-slate-100 border border-slate-200/90 text-slate-800 shadow-2xs rounded-full',
       dropdown:
         'bg-white border border-slate-200 text-slate-800 shadow-xl',
       dropdownDivider: 'border-slate-100',
@@ -95,42 +99,44 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const theme = getTheme();
 
-  // Mobile native app bottom navigation items
+  // Mobile native app bottom navigation items - streamlined & compact
   const getMobileNavItems = () => {
     if (currentRole === 'guest') {
       return [
-        { id: 'home', label: 'Home', icon: <Home className="w-5 h-5" /> },
-        { id: 'services', label: 'Service', icon: <HeartHandshake className="w-5 h-5" /> },
-        { id: 'membership', label: 'Membership', icon: <Crown className="w-5 h-5" /> },
-        { id: 'stories', label: 'Stories', icon: <BookOpen className="w-5 h-5" /> },
+        { id: 'home', label: 'Home', Icon: Home },
+        { id: 'review', label: 'Review', Icon: MessageSquareHeart },
+        { id: 'membership', label: 'Plans', Icon: Crown },
+        { id: 'stories', label: 'Stories', Icon: BookOpen },
       ];
     }
     if (currentRole === 'user') {
       return [
-        { id: 'user-dashboard', label: 'Home', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { id: 'profiles', label: 'Matches', icon: <Search className="w-5 h-5" /> },
+        { id: 'user-dashboard', label: 'Home', Icon: LayoutDashboard },
+        { id: 'profiles', label: 'Matches', Icon: Search },
         {
           id: 'user-proposals',
           label: 'Proposals',
-          icon: <Inbox className="w-5 h-5" />,
+          Icon: Inbox,
           badge: receivedProposalsCount > 0 ? receivedProposalsCount : undefined,
         },
-        { id: 'user-edit-profile', label: 'Biodata', icon: <UserCheck className="w-5 h-5" /> },
-        { id: 'membership', label: 'Plan', icon: <Crown className="w-5 h-5" /> },
+        { id: 'review', label: 'Review', Icon: MessageSquareHeart },
+        { id: 'membership', label: 'Plan', Icon: Crown },
       ];
     }
     if (currentRole === 'admin') {
       return [
-        { id: 'admin-dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { id: 'admin-users', label: 'Users', icon: <UserCheck className="w-5 h-5" /> },
-        { id: 'admin-my-assign', label: 'Assigned', icon: <Heart className="w-5 h-5" /> },
+        { id: 'admin-dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+        { id: 'admin-users', label: 'Users', Icon: UserCheck },
+        { id: 'review', label: 'Review', Icon: MessageSquareHeart },
+        { id: 'admin-my-assign', label: 'Assigned', Icon: Heart },
       ];
     }
     // Superadmin
     return [
-      { id: 'superadmin-dashboard', label: 'Console', icon: <LayoutDashboard className="w-5 h-5" /> },
-      { id: 'superadmin-users', label: 'Candidates', icon: <UserCheck className="w-5 h-5" /> },
-      { id: 'superadmin-admins', label: 'Admins', icon: <Shield className="w-5 h-5" /> },
+      { id: 'superadmin-dashboard', label: 'Console', Icon: LayoutDashboard },
+      { id: 'superadmin-users', label: 'Candidates', Icon: UserCheck },
+      { id: 'review', label: 'Review', Icon: MessageSquareHeart },
+      { id: 'superadmin-admins', label: 'Admins', Icon: Shield },
     ];
   };
 
@@ -138,12 +144,19 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       <header
         id="main-header"
-        className={`sticky top-0 z-40 transition-all duration-300 relative ${theme.headerClass}`}
+        className="sticky top-1 sm:top-2.5 z-40 w-full px-2 sm:px-4 lg:px-6 transition-all duration-300 pointer-events-none"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center justify-between h-16">
-            {/* Brand Logo - Responsive sizing (compact on mobile, standard on desktop) */}
-            <div className="flex items-center">
+        {/* Rounded container on both sides with subtle bottom shadow and smart design elements */}
+        <div
+          className={`pointer-events-auto max-w-7xl mx-auto rounded-2xl sm:rounded-full ${theme.innerClass} pl-1.5 pr-2 sm:px-4 lg:px-6 relative z-10 transition-all duration-300`}
+        >
+          {/* Subtle luxury bottom micro-glow hairline */}
+          <div className="absolute bottom-0 inset-x-8 sm:inset-x-16 h-[1px] bg-gradient-to-r from-transparent via-[#D91B2B]/25 to-transparent pointer-events-none rounded-full" />
+
+          {/* Slim and compact header row on mobile: h-11 (44px) removing unnecessary dead space */}
+          <div className="flex items-center justify-between h-11 sm:h-12 md:h-14 lg:h-16">
+            {/* Brand Logo - Pushed tightly to the far left corner */}
+            <div className="flex items-center shrink-0 -ml-0.5 sm:ml-0">
               <div
                 onClick={() => handleNavClick('home')}
                 className="flex items-center cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
@@ -153,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="hidden sm:block">
                   <BrandLogo size="sm" variant="horizontal" inverted={false} />
                 </div>
-                {/* Mobile view: Smaller, compact & ultra-premium */}
+                {/* Mobile view: Compact & placed snugly in the corner */}
                 <div className="block sm:hidden">
                   <BrandLogo size="xs" variant="horizontal" inverted={false} />
                 </div>
@@ -161,7 +174,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
           {/* Desktop Navigation Links - Dynamically themed */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
             {currentRole === 'guest' && (
               <>
                 <button
@@ -176,13 +189,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                 </button>
                 <button
-                  onClick={() => handleNavClick('services')}
+                  onClick={() => handleNavClick('review')}
                   className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'services' ? theme.navActive : theme.navDefault
+                    activeTab === 'review' ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Service
-                  {activeTab !== 'services' && (
+                  Review
+                  {activeTab !== 'review' && (
                     <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#E60000] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
@@ -243,6 +256,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                 </button>
                 <button
+                  onClick={() => handleNavClick('review')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  }`}
+                >
+                  Review
+                </button>
+                <button
                   onClick={() => handleNavClick('user-edit-profile')}
                   className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeTab === 'user-edit-profile' ? theme.navActive : theme.navDefault
@@ -280,6 +301,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   All Users
                 </button>
                 <button
+                  onClick={() => handleNavClick('review')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  }`}
+                >
+                  Timeline Review
+                </button>
+                <button
                   onClick={() => handleNavClick('admin-my-assign')}
                   className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeTab === 'admin-my-assign' ? theme.navActive : theme.navDefault
@@ -309,6 +338,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   Super Overview
                 </button>
                 <button
+                  onClick={() => handleNavClick('admin-users')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'admin-users' ? theme.navActive : theme.navDefault
+                  }`}
+                >
+                  All Users
+                </button>
+                <button
+                  onClick={() => handleNavClick('review')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  }`}
+                >
+                  Timeline Review
+                </button>
+                <button
                   onClick={() => handleNavClick('superadmin-users')}
                   className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeTab === 'superadmin-users' ? theme.navActive : theme.navDefault
@@ -334,13 +379,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={onOpenLogin}
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${theme.loginButton}`}
+                  className={`px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${theme.loginButton}`}
                 >
                   Log In
                 </button>
                 <button
                   onClick={onOpenRegister}
-                  className="relative overflow-hidden inline-flex items-center gap-1.5 bg-gradient-to-r from-[#D91B2B] to-[#b91422] hover:from-[#c21524] hover:to-[#9f0e1b] text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-sm shadow-rose-900/15 hover:shadow-md active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                  className="relative overflow-hidden inline-flex items-center gap-1.5 bg-gradient-to-r from-[#D91B2B] via-[#c21524] to-[#9f0e1b] hover:from-[#c21524] hover:to-[#8c0a16] text-white px-4 py-1.5 rounded-full font-bold text-xs shadow-sm shadow-rose-900/15 hover:shadow-md active:scale-[0.98] transition-all duration-200 cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-rose-200 shrink-0" />
                   <span className="tracking-wide">Registration</span>
@@ -467,26 +512,44 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Mobile Right Actions: Side-by-side Log In & Registration buttons */}
-          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2">
+          {/* Mobile Right Actions: High-class smart pills and quick shortcuts */}
+          <div className="flex lg:hidden items-center gap-1 sm:gap-1.5 shrink-0">
             {currentRole === 'guest' ? (
               <>
+                {/* Sleek Log In Pill */}
                 <button
                   onClick={onOpenLogin}
-                  className="px-2.5 py-1 text-[11px] font-semibold rounded-lg text-slate-700 hover:text-[#D91B2B] bg-slate-50 hover:bg-slate-100 border border-slate-200/90 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                  className="px-2.5 py-1 text-[11px] font-semibold rounded-full text-slate-700 hover:text-[#D91B2B] bg-slate-50/90 hover:bg-slate-100 border border-slate-200/90 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                 >
                   Log In
                 </button>
+
+                {/* Jewel Ruby Registration Pill with subtle sparkles */}
                 <button
                   onClick={onOpenRegister}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg text-white bg-gradient-to-r from-[#D91B2B] to-[#b91422] hover:from-[#c21524] hover:to-[#9f0e1b] shadow-sm shadow-rose-900/15 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                  className="relative overflow-hidden inline-flex items-center gap-1 px-3 py-1 text-[11px] font-bold rounded-full text-white bg-gradient-to-r from-[#D91B2B] via-[#c21524] to-[#990e1b] shadow-xs shadow-rose-600/25 hover:shadow-sm hover:shadow-rose-600/30 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                 >
                   <Sparkles className="w-3 h-3 text-rose-200 shrink-0" />
                   <span>Registration</span>
                 </button>
               </>
             ) : (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                {/* Proposal quick button if candidate */}
+                {currentRole === 'user' && (
+                  <button
+                    onClick={() => handleNavClick('user-proposals')}
+                    className="relative p-1 text-slate-600 hover:text-[#D91B2B] rounded-full hover:bg-slate-100 transition-all active:scale-90"
+                    title="Proposals"
+                  >
+                    <Inbox className="w-3.5 h-3.5" />
+                    {receivedProposalsCount > 0 && (
+                      <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-[#D91B2B] border border-white animate-pulse" />
+                    )}
+                  </button>
+                )}
+
+                {/* Smart User Profile Chip */}
                 <button
                   onClick={() =>
                     handleNavClick(
@@ -497,23 +560,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                         : 'superadmin-dashboard'
                     )
                   }
-                  className="flex items-center gap-1.5 p-1 pr-2 rounded-full border border-slate-200 bg-slate-50 text-slate-800 shadow-2xs cursor-pointer active:scale-95"
+                  className="flex items-center gap-1.5 p-0.5 pr-2 rounded-full border border-slate-200/90 bg-slate-50/90 text-slate-800 shadow-2xs cursor-pointer active:scale-95"
                 >
-                  <img
-                    src={currentUser?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop'}
-                    alt={currentUser?.name}
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                  <span className="text-[10px] font-bold max-w-[70px] truncate text-slate-700">
+                  <div className="relative">
+                    <img
+                      src={currentUser?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop'}
+                      alt={currentUser?.name}
+                      className="w-5.5 h-5.5 rounded-full object-cover border border-white"
+                    />
+                    <span className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-white" />
+                  </div>
+                  <span className="text-[10px] font-bold max-w-[65px] truncate text-slate-700">
                     {currentUser?.name?.split(' ')[0]}
                   </span>
                 </button>
+
                 <button
                   onClick={onLogout}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                   title="Log Out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -522,46 +589,50 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
     </header>
 
-    {/* Mobile Native App Bottom Navigation Bar */}
+    {/* Mobile Native App Bottom Navigation Bar - Ultra-Slim Floating Luxury Dock */}
     <nav
       id="mobile-bottom-bar"
-      className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] py-1 px-2 flex items-center justify-around select-none pb-[calc(env(safe-area-inset-bottom)+0.25rem)]"
+      className="lg:hidden fixed bottom-2 inset-x-2 sm:inset-x-8 max-w-lg mx-auto z-40 bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/90 shadow-[0_8px_30px_-4px_rgba(2,6,31,0.14),0_2px_8px_rgba(0,0,0,0.04)] px-1.5 py-1 flex items-center justify-around select-none"
       aria-label="Mobile Bottom Navigation"
     >
+      {/* Subtle luxury micro hairline glow */}
+      <div className="absolute -top-[1px] inset-x-6 h-[1px] bg-gradient-to-r from-transparent via-[#D91B2B]/25 to-transparent pointer-events-none rounded-full" />
+
       {getMobileNavItems().map((item) => {
         const isActive = activeTab === item.id;
+        const IconComponent = item.Icon;
         return (
           <button
             key={item.id}
             onClick={() => handleNavClick(item.id)}
-            className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-90 relative ${
+            className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 ${
               isActive ? 'text-[#D91B2B]' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <div className="relative flex items-center justify-center">
-              <div
-                className={`p-1 rounded-xl transition-all duration-200 ${
-                  isActive ? 'bg-rose-50 text-[#D91B2B] scale-105' : 'text-slate-400'
+            {/* Active subtle luxury pill highlight */}
+            {isActive && (
+              <span className="absolute inset-0.5 bg-gradient-to-b from-rose-50/90 to-red-50/50 rounded-xl border border-rose-200/70 shadow-2xs -z-0" />
+            )}
+
+            <div className="relative z-10 flex items-center justify-center">
+              <IconComponent
+                className={`w-4 h-4 transition-all duration-200 ${
+                  isActive ? 'text-[#D91B2B] stroke-[2.2]' : 'text-slate-400 stroke-[1.8]'
                 }`}
-              >
-                {item.icon}
-              </div>
+              />
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 px-1 min-w-[14px] h-[14px] text-[9px] font-extrabold bg-[#D91B2B] text-white rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
+                <span className="absolute -top-1.5 -right-2 px-1 min-w-[13px] h-[13px] text-[8px] font-black bg-[#D91B2B] text-white rounded-full flex items-center justify-center border border-white shadow-2xs">
                   {item.badge}
                 </span>
               )}
             </div>
             <span
-              className={`text-[10px] tracking-tight mt-0.5 whitespace-nowrap transition-colors ${
-                isActive ? 'text-[#D91B2B] font-bold' : 'text-slate-500 font-medium'
+              className={`relative z-10 text-[9px] font-semibold tracking-tight mt-0.5 whitespace-nowrap leading-none transition-colors ${
+                isActive ? 'text-[#D91B2B]' : 'text-slate-500'
               }`}
             >
               {item.label}
             </span>
-            {isActive && (
-              <span className="w-1 h-1 rounded-full bg-[#D91B2B] mt-0.5" />
-            )}
           </button>
         );
       })}

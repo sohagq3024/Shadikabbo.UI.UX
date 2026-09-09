@@ -85,12 +85,12 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
             } else if (isVIP) {
               cardClasses += 'bg-gradient-to-b from-[#171923] via-[#1c1626] to-[#0f111a] text-white border border-rose-500/40 shadow-lg sm:shadow-xl hover:shadow-2xl hover:border-rose-400';
             } else {
-              cardClasses += 'bg-white text-slate-900 border border-white/90 shadow-2xl shadow-black/30 hover:shadow-2xl hover:border-slate-300';
+              cardClasses += 'bg-gradient-to-b from-[#111f4d] via-[#0c1638] to-[#070e24] text-white border border-cyan-400/40 shadow-xl sm:shadow-2xl hover:shadow-2xl hover:border-cyan-400/80';
             }
 
             return (
               <div key={plan.id} className={cardClasses}>
-                {/* Popular / VIP Ribbon */}
+                {/* Popular / VIP / Smart Starter Ribbon */}
                 {isPopular && (
                   <div className="absolute -top-2.5 sm:-top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 via-rose-500 to-[#D91B2B] text-white text-[7px] sm:text-[10px] font-extrabold uppercase tracking-widest px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap z-10">
                     <Sparkles className="w-2 h-2 sm:w-3 sm:h-3 text-amber-200" />
@@ -104,6 +104,13 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                     <span>VIP ELITE</span>
                   </div>
                 )}
+                {!isPopular && !isVIP && (
+                  <div className="absolute -top-2.5 sm:-top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white text-[7px] sm:text-[10px] font-extrabold uppercase tracking-widest px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap z-10">
+                    <ShieldCheck className="w-2 h-2 sm:w-3 sm:h-3 text-cyan-200" />
+                    <span className="hidden sm:inline">STARTER SMART</span>
+                    <span className="sm:hidden">SMART</span>
+                  </div>
+                )}
 
                 <div>
                   {/* Top Badge & Duration */}
@@ -114,14 +121,14 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                           ? 'bg-white/15 text-amber-300 border border-amber-400/30'
                           : isVIP
                           ? 'bg-white/10 text-rose-300 border border-rose-400/30'
-                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          : 'bg-white/10 text-cyan-300 border border-cyan-400/30'
                       }`}
                     >
                       {plan.badge}
                     </span>
                     <span
                       className={`text-[7px] sm:text-xs font-semibold shrink-0 ${
-                        isPopular ? 'text-amber-200' : isVIP ? 'text-rose-200' : 'text-[#D91B2B]'
+                        isPopular ? 'text-amber-200' : isVIP ? 'text-rose-200' : 'text-cyan-200'
                       }`}
                     >
                       {plan.duration}
@@ -129,12 +136,12 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                   </div>
 
                   {/* Plan Name & Bangla Title */}
-                  <h3 className="text-[11px] sm:text-lg lg:text-xl font-bold font-display leading-tight truncate">
+                  <h3 className="text-[11px] sm:text-lg lg:text-xl font-bold font-display leading-tight truncate text-white">
                     {plan.name}
                   </h3>
                   <p
                     className={`text-[8px] sm:text-xs truncate ${
-                      isPopular ? 'text-slate-300' : isVIP ? 'text-slate-400' : 'text-slate-500'
+                      isPopular ? 'text-slate-300' : isVIP ? 'text-slate-400' : 'text-slate-300'
                     }`}
                   >
                     {plan.nameBangla}
@@ -143,16 +150,12 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                   {/* Price */}
                   <div className="my-1.5 sm:my-3">
                     <div className="flex items-baseline gap-0.5 sm:gap-1">
-                      <span
-                        className={`text-xs sm:text-2xl lg:text-3xl font-extrabold tracking-tight ${
-                          isPopular || isVIP ? 'text-white' : 'text-[#16205B]'
-                        }`}
-                      >
+                      <span className="text-xs sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white">
                         ৳{plan.priceBDT.toLocaleString()}
                       </span>
                       <span
                         className={`text-[7px] sm:text-xs font-medium truncate ${
-                          isPopular ? 'text-slate-300' : isVIP ? 'text-slate-400' : 'text-slate-500'
+                          isPopular ? 'text-slate-300' : isVIP ? 'text-slate-400' : 'text-slate-300'
                         }`}
                       >
                         / {plan.duration}
@@ -167,7 +170,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                         ? 'bg-white/10 text-amber-200'
                         : isVIP
                         ? 'bg-white/10 text-rose-200'
-                        : 'bg-rose-50/70 text-[#16205B]'
+                        : 'bg-white/10 text-cyan-200 border border-white/5'
                     }`}
                   >
                     <p className="flex items-center gap-1 truncate">
@@ -186,12 +189,12 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                       <li key={idx} className="flex items-center gap-1 sm:gap-1.5">
                         <Check
                           className={`w-2 h-2 sm:w-3.5 sm:h-3.5 shrink-0 ${
-                            isPopular ? 'text-amber-300' : isVIP ? 'text-rose-400' : 'text-emerald-600'
+                            isPopular ? 'text-amber-300' : isVIP ? 'text-rose-400' : 'text-cyan-300'
                           }`}
                         />
                         <span
                           className={`truncate ${
-                            isPopular ? 'text-slate-200' : isVIP ? 'text-slate-300' : 'text-slate-600'
+                            isPopular ? 'text-slate-200' : isVIP ? 'text-slate-300' : 'text-slate-200'
                           }`}
                         >
                           {feat}
@@ -218,7 +221,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                           ? 'bg-gradient-to-r from-[#D91B2B] to-[#b91422] hover:from-[#c21524] hover:to-[#9f0e1b] text-white shadow-rose-900/40'
                           : isVIP
                           ? 'bg-gradient-to-r from-rose-600 to-amber-700 hover:opacity-90 text-white'
-                          : 'bg-[#16205B] hover:bg-[#0f1744] text-white'
+                          : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-700 hover:brightness-110 text-white shadow-md shadow-blue-900/40'
                       }`}
                     >
                       <span className="hidden sm:inline">Choose {plan.name.replace(' Package', '')}</span>

@@ -156,3 +156,35 @@ export interface MatchmakingService {
   iconName: string;
   benefits: string[];
 }
+
+export interface ReviewComment {
+  id: string;
+  userName: string;
+  userAvatar?: string;
+  userRole?: string;
+  comment: string;
+  createdAt: string;
+}
+
+export interface ReviewPost {
+  id: string;
+  authorName: string;
+  authorVerified: boolean;
+  isOnline: boolean;
+  uploadedDate: string;
+  relativeTime: string;
+  category?: 'Wedding Success' | 'Verified Match' | 'Client Review' | 'Community Story';
+  caption: string;
+  mediaType: 'image' | 'video';
+  mediaUrl: string;
+  videoDuration?: string;
+  likesCount: number;
+  isLiked?: boolean;
+  sharesCount: number;
+  comments: ReviewComment[];
+  coupleDetails?: {
+    brideName?: string;
+    groomName?: string;
+    weddingLocation?: string;
+  };
+}

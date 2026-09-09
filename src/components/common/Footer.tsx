@@ -101,8 +101,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRegister }) =>
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-white transition-colors">
-                  Matchmaking Services
+                <button onClick={() => onNavigate('review')} className="hover:text-white transition-colors">
+                  Timeline Reviews & Video Reels
                 </button>
               </li>
               <li>

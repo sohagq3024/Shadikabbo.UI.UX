@@ -13,6 +13,7 @@ import { CountryCategoriesSection } from './components/public/CountryCategoriesS
 import { MatchmakingServicesSection } from './components/public/MatchmakingServicesSection';
 import { MembershipSection } from './components/public/MembershipSection';
 import { SuccessStoriesSection } from './components/public/SuccessStoriesSection';
+import { ReviewTimeline } from './components/public/ReviewTimeline';
 import { UserDashboard } from './components/dashboard/UserDashboard';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { SuperAdminDashboard } from './components/admin/SuperAdminDashboard';
@@ -188,6 +189,11 @@ function MatrimonialApp() {
 
   // Hero search trigger
   const handleHeroSearch = (filters: { gender: string; minAge: number; maxAge: number; country: string }) => {
+    if (!currentUser || currentRole === 'guest') {
+      setIsLoginOpen(true);
+      showToast('Login Mandatory', 'বায়োডাটা অনুসন্ধান করতে দয়া করে প্রথমে লগইন করুন।', 'info');
+      return;
+    }
     setHeroSearchFilters({
       gender: filters.gender,
       country: filters.country,
@@ -216,22 +222,41 @@ function MatrimonialApp() {
     .filter((p) => p.senderProfileId === userProfile.profileId)
     .map((p) => p.receiverProfileId);
 
-  // Auto-scroll on tab change
+  // Auto-scroll on tab change or registration open
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeTab]);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeTab, isRegisterOpen]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-100 selection:text-[#D91B2B] pb-16 lg:pb-0">
+    <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-100 selection:text-[#D91B2B] ${isRegisterOpen ? 'pb-4' : 'pb-16 lg:pb-0'}`}>
       {/* 1. Global Navbar */}
       <Navbar
         currentRole={currentRole}
         currentUser={currentUser}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onOpenLogin={() => setIsLoginOpen(true)}
-        onOpenRegister={() => setIsRegisterOpen(true)}
-        onLogout={handleLogout}
+        activeTab={isRegisterOpen ? '' : activeTab}
+        isRegisterOpen={isRegisterOpen}
+        onTabChange={(tab) => {
+          setIsRegisterOpen(false);
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+        onNavigate={(tab) => {
+          setIsRegisterOpen(false);
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+        onOpenLogin={() => {
+          setIsRegisterOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onOpenRegister={() => {
+          setIsRegisterOpen(true);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+        onLogout={() => {
+          setIsRegisterOpen(false);
+          handleLogout();
+        }}
         receivedProposalsCount={proposals.filter((p) => p.receiverProfileId === userProfile.profileId && p.status === 'pending').length}
       />
 
@@ -239,7 +264,11 @@ function MatrimonialApp() {
       <main className={`flex-1 transition-all duration-300 ${activeTab === 'home' && !isRegisterOpen ? '-mt-20' : ''}`}>
         {isRegisterOpen ? (
           <RegistrationFlow
-            onCancel={() => setIsRegisterOpen(false)}
+            onCancel={() => {
+              setIsRegisterOpen(false);
+              setActiveTab('home');
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
             onComplete={handleRegisterComplete}
           />
         ) : (
@@ -251,6 +280,7 @@ function MatrimonialApp() {
                   onSearch={handleHeroSearch}
                   onOpenRegister={() => setIsRegisterOpen(true)}
                   onOpenLogin={() => setIsLoginOpen(true)}
+                  isLoggedIn={!!currentUser && currentRole !== 'guest'}
                 />
                 <ProfileDiscovery
                   profiles={allProfiles.slice(0, 3)}
@@ -302,13 +332,14 @@ function MatrimonialApp() {
               />
             )}
 
-            {/* VIEW: Matchmaking Services */}
-            {activeTab === 'services' && (
-              <div className="py-8">
-                <MatchmakingServicesSection
-                  onOpenRegister={() => setIsRegisterOpen(true)}
-                />
-              </div>
+            {/* VIEW: Facebook Timeline Style Review Feed */}
+            {(activeTab === 'review' || activeTab === 'services') && (
+              <ReviewTimeline
+                currentRole={currentRole}
+                currentUser={currentUser}
+                onOpenLogin={() => setIsLoginOpen(true)}
+                onOpenRegister={() => setIsRegisterOpen(true)}
+              />
             )}
 
             {/* VIEW: Membership & Pricing */}
@@ -379,11 +410,13 @@ function MatrimonialApp() {
         )}
       </main>
 
-      {/* 4. Global Footer */}
-      <Footer
-        onSelectCountry={handleSelectCountryCategory}
-        onOpenRegister={() => setIsRegisterOpen(true)}
-      />
+      {/* 4. Global Footer (Only visible on Home page, hidden on other pages) */}
+      {activeTab === 'home' && !isRegisterOpen && (
+        <Footer
+          onSelectCountry={handleSelectCountryCategory}
+          onOpenRegister={() => setIsRegisterOpen(true)}
+        />
+      )}
 
       {/* 5. Login Modal */}
       <LoginModal

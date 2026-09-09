@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BrandLogo } from '../common/BrandLogo';
 import { MatrimonialProfile, UserAccount } from '../../types';
 import {
   Check,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Upload,
   User,
   Briefcase,
@@ -19,6 +20,32 @@ import {
 } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
+interface CountryOption {
+  id: string;
+  code: string;
+  dialCode: string;
+  name: string;
+}
+
+const COUNTRY_OPTIONS: CountryOption[] = [
+  { id: '+880', code: 'bd', dialCode: '+880', name: 'Bangladesh' },
+  { id: '+1_US', code: 'us', dialCode: '+1', name: 'United States' },
+  { id: '+1_CA', code: 'ca', dialCode: '+1', name: 'Canada' },
+  { id: '+61', code: 'au', dialCode: '+61', name: 'Australia' },
+  { id: '+44', code: 'gb', dialCode: '+44', name: 'United Kingdom' },
+  { id: '+971', code: 'ae', dialCode: '+971', name: 'United Arab Emirates' },
+  { id: '+966', code: 'sa', dialCode: '+966', name: 'Saudi Arabia' },
+  { id: '+60', code: 'my', dialCode: '+60', name: 'Malaysia' },
+  { id: '+65', code: 'sg', dialCode: '+65', name: 'Singapore' },
+  { id: '+91', code: 'in', dialCode: '+91', name: 'India' },
+  { id: '+39', code: 'it', dialCode: '+39', name: 'Italy' },
+  { id: '+49', code: 'de', dialCode: '+49', name: 'Germany' },
+  { id: '+33', code: 'fr', dialCode: '+33', name: 'France' },
+  { id: '+974', code: 'qa', dialCode: '+974', name: 'Qatar' },
+  { id: '+965', code: 'kw', dialCode: '+965', name: 'Kuwait' },
+  { id: '+968', code: 'om', dialCode: '+968', name: 'Oman' },
+];
+
 interface RegistrationFlowProps {
   onCancel: () => void;
   onComplete: (newUser: UserAccount, newProfile: MatrimonialProfile) => void;
@@ -31,6 +58,21 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
   const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Form states matching user specs
   const [formData, setFormData] = useState({
@@ -40,7 +82,8 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
     createdFor: 'Self' as MatrimonialProfile['createdFor'],
     gender: 'Male' as 'Male' | 'Female',
     dateOfBirth: '1998-05-15',
-    contactNumber: '+880 17',
+    countryCode: '+880',
+    contactNumber: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -96,6 +139,10 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
         showToast('Candidate Name Required', 'Please provide the candidate full name.', 'error');
         return false;
       }
+      if (!formData.contactNumber.trim()) {
+        showToast('Mobile Number Required', 'Please provide your mobile or WhatsApp contact number.', 'error');
+        return false;
+      }
       if (!formData.email.trim() || !formData.email.includes('@')) {
         showToast('Valid Email Required', 'Please provide a valid email address.', 'error');
         return false;
@@ -144,12 +191,15 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
     const newUserId = 'usr-' + Math.random().toString(36).substring(2, 7);
     const newProfileId = 'SK-' + Math.floor(1000 + Math.random() * 9000);
 
+    const selectedCountry =
+      COUNTRY_OPTIONS.find((c) => c.id === formData.countryCode) || COUNTRY_OPTIONS[0];
+
     const newUser: UserAccount = {
       id: newUserId,
       name: formData.candidateName,
       email: formData.email,
       role: 'user',
-      phone: formData.contactNumber,
+      phone: `${selectedCountry.dialCode} ${formData.contactNumber}`.trim(),
       avatar: formData.avatar,
       membershipPlan: 'free',
       createdAt: new Date().toISOString().split('T')[0],
@@ -266,86 +316,142 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/80 py-10 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto">
-        {/* Header with Brand Logo and Cancel Button */}
-        <div className="flex items-center justify-between mb-8">
-          <BrandLogo size="md" variant="horizontal" />
-          <button
-            onClick={onCancel}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-200/60 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Cancel Registration
-          </button>
-        </div>
-
-        {/* Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-[#D91B2B] text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            Step-by-Step Matrimonial Registration
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-display">
-            Create Your Verified Matrimonial Biodata
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto mt-1">
-            Join thousands of respectable families finding ideal life partners with dignity, security, and verified authenticity.
-          </p>
-        </div>
-
-        {/* Step Indicator Bar */}
-        <div className="mb-8 bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-          <div className="grid grid-cols-4 gap-2 text-center">
-            {steps.map((step) => {
-              const isPast = currentStep > step.num;
-              const isCurrent = currentStep === step.num;
-              return (
-                <div key={step.num} className="flex flex-col items-center">
+    <div className="w-full min-h-screen py-2 sm:py-8 lg:py-10 px-2.5 sm:px-6 lg:px-8 flex flex-col justify-start lg:justify-center items-center pb-32 sm:pb-12">
+      <div className="w-full max-w-xl sm:max-w-3xl lg:max-w-5xl mx-auto">
+        {/* Responsive 4-Step Indicator Bar */}
+        <div className="mb-3 sm:mb-4 bg-white rounded-xl sm:rounded-2xl p-2.5 sm:px-5 sm:py-2.5 shadow-sm border border-slate-200/90">
+          {/* Mobile Stepper (Clean, compact progress bar & badges) */}
+          <div className="block sm:hidden">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="font-bold text-slate-800">
+                Step {currentStep} of 4: <span className="text-[#16205B]">{steps[currentStep - 1].label}</span>
+              </span>
+              <span className="font-extrabold text-[11px] text-[#D91B2B] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+                {currentStep * 25}%
+              </span>
+            </div>
+            {/* 4-segment clean progress line */}
+            <div className="grid grid-cols-4 gap-1.5">
+              {steps.map((step) => {
+                const isPast = currentStep > step.num;
+                const isCurrent = currentStep === step.num;
+                return (
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                      isPast
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : isCurrent
-                        ? 'bg-[#16205B] text-white ring-4 ring-[#16205B]/15 shadow-md'
-                        : 'bg-slate-100 text-slate-400'
+                    key={step.num}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      isCurrent
+                        ? 'bg-[#16205B] shadow-xs'
+                        : isPast
+                        ? 'bg-emerald-500'
+                        : 'bg-slate-200'
                     }`}
-                  >
-                    {isPast ? <Check className="w-4 h-4" /> : step.icon}
-                  </div>
-                  <span
-                    className={`text-[11px] mt-2 font-medium hidden sm:block ${
-                      isCurrent ? 'text-[#16205B] font-bold' : isPast ? 'text-emerald-700' : 'text-slate-400'
-                    }`}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-              );
-            })}
+                  />
+                );
+              })}
+            </div>
+            {/* 4 compact labels */}
+            <div className="grid grid-cols-4 gap-1 text-[10px] text-center font-medium mt-1.5 text-slate-400">
+              {steps.map((step) => (
+                <span
+                  key={step.num}
+                  className={`truncate ${
+                    currentStep === step.num
+                      ? 'text-[#16205B] font-bold'
+                      : currentStep > step.num
+                      ? 'text-emerald-700 font-semibold'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  {step.label}
+                </span>
+              ))}
+            </div>
           </div>
-          {/* Progress Line */}
-          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-[#16205B] to-[#D91B2B] h-full transition-all duration-300"
-              style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
-            />
+
+          {/* Desktop Stepper (Luxury pills) */}
+          <div className="hidden sm:flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 lg:gap-3 flex-1 overflow-x-auto no-scrollbar py-0.5">
+              {steps.map((step) => {
+                const isPast = currentStep > step.num;
+                const isCurrent = currentStep === step.num;
+                return (
+                  <div
+                    key={step.num}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
+                      isCurrent
+                        ? 'bg-[#16205B] text-white shadow-xs'
+                        : isPast
+                        ? 'text-emerald-700 bg-emerald-50 font-medium'
+                        : 'text-slate-400 bg-slate-50'
+                    }`}
+                  >
+                    <span
+                      className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 ${
+                        isCurrent
+                          ? 'bg-white text-[#16205B]'
+                          : isPast
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {isPast ? <Check className="w-3 h-3 stroke-[3]" /> : step.num}
+                    </span>
+                    <span>{step.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <span className="text-xs sm:text-sm font-bold text-[#D91B2B] bg-rose-50 px-3 py-1 rounded-full shrink-0 border border-rose-100">
+              Step {currentStep}/4
+            </span>
           </div>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/80">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-10 shadow-lg border border-slate-200/90 relative">
+          {/* Form Header: Utility row (Cancel + Logo) & Title row - Hidden on mobile since top navbar has the logo and the stepper bar shows current step */}
+          <div className="hidden sm:block border-b border-slate-100 pb-3 sm:pb-4 mb-4 sm:mb-6">
+            <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-[#D91B2B] px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200/80 cursor-pointer"
+                title="Cancel registration and return to Home"
+              >
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
+                <span>Cancel / Home</span>
+              </button>
+
+              {/* Form Right Corner Logo - Clickable to return Home */}
+              <div
+                className="shrink-0 cursor-pointer hover:opacity-85 transition-opacity"
+                onClick={onCancel}
+                title="Return to Home"
+              >
+                <BrandLogo size="xs" variant="horizontal" />
+              </div>
+            </div>
+
+            {/* Current Step Title & Subtitle (Desktop / Tablet view) */}
+            <div>
+              <h2 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 font-display">
+                {currentStep === 1 && 'Step 1: Candidate Basic Information'}
+                {currentStep === 2 && 'Step 2: Career, Education & Address'}
+                {currentStep === 3 && 'Step 3: Family Heritage & Details'}
+                {currentStep === 4 && 'Step 4: Partner Preferences & Media'}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {currentStep === 1 && 'Primary personal identification and authentic contact credentials.'}
+                {currentStep === 2 && 'Educational background, current occupation, height and residency.'}
+                {currentStep === 3 && 'Parents background, siblings details and family values.'}
+                {currentStep === 4 && 'Desired partner criteria, candidate photo upload and preferences.'}
+              </p>
+            </div>
+          </div>
+
           {/* STEP 1: Basic Info */}
           {currentStep === 1 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-bold text-slate-900 font-display">
-                  Step 1: Candidate Basic Information
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Primary profile details to identify and authenticate the candidate.
-                </p>
-              </div>
+            <div className="space-y-4 animate-in fade-in">
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -444,14 +550,89 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Contact / WhatsApp Number *
                   </label>
-                  <input
-                    type="tel"
-                    value={formData.contactNumber}
-                    onChange={(e) => updateField('contactNumber', e.target.value)}
-                    placeholder="+880 1711-xxxxxx"
-                    required
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
+                  <div className="flex gap-2">
+                    {/* Custom Country Flag Selector */}
+                    <div className="relative shrink-0" ref={countryDropdownRef}>
+                      {(() => {
+                        const selectedCountry =
+                          COUNTRY_OPTIONS.find((c) => c.id === formData.countryCode) ||
+                          COUNTRY_OPTIONS[0];
+                        return (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                              className="flex items-center gap-2 h-10 px-2.5 sm:px-3 text-xs rounded-xl border border-slate-200 bg-white hover:bg-slate-50 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] cursor-pointer shadow-xs transition-colors"
+                              title={selectedCountry.name}
+                            >
+                              <img
+                                src={`https://flagcdn.com/w40/${selectedCountry.code}.png`}
+                                alt={selectedCountry.name}
+                                className="w-5 h-3.5 object-cover rounded-xs border border-slate-200/80 shrink-0"
+                                loading="lazy"
+                              />
+                              <span className="font-bold text-slate-700">{selectedCountry.dialCode}</span>
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                                  isCountryDropdownOpen ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+
+                            {isCountryDropdownOpen && (
+                              <div className="absolute top-full left-0 mt-1.5 w-60 sm:w-64 max-h-56 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1 divide-y divide-slate-50">
+                                {COUNTRY_OPTIONS.map((c) => (
+                                  <button
+                                    key={c.id}
+                                    type="button"
+                                    onClick={() => {
+                                      updateField('countryCode', c.id);
+                                      setIsCountryDropdownOpen(false);
+                                    }}
+                                    className={`w-full flex items-center justify-between px-3 py-2 text-xs text-left hover:bg-slate-50 transition-colors cursor-pointer ${
+                                      formData.countryCode === c.id
+                                        ? 'bg-rose-50/70 font-bold text-[#D91B2B]'
+                                        : 'text-slate-700'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <img
+                                        src={`https://flagcdn.com/w40/${c.code}.png`}
+                                        alt={c.name}
+                                        className="w-5 h-3.5 object-cover rounded-xs border border-slate-200/80 shrink-0"
+                                        loading="lazy"
+                                      />
+                                      <span className="truncate">{c.name}</span>
+                                    </div>
+                                    <span className="text-slate-500 font-mono text-[11px] shrink-0 pl-2">
+                                      {c.dialCode}
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    <input
+                      type="tel"
+                      value={formData.contactNumber}
+                      onChange={(e) => updateField('contactNumber', e.target.value)}
+                      placeholder={
+                        formData.countryCode === '+880'
+                          ? '01XXXXXXXXX'
+                          : formData.countryCode.startsWith('+1')
+                          ? '555-123-4567'
+                          : formData.countryCode === '+61'
+                          ? '4XX XXX XXX'
+                          : 'Mobile number'
+                      }
+                      required
+                      className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] min-w-0 h-10"
+                    />
+                  </div>
                   <span className="text-[10px] text-slate-400 mt-1 block">
                     Secured. Never displayed publicly without your consent.
                   </span>
@@ -506,16 +687,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
 
           {/* STEP 2: Personal & Professional */}
           {currentStep === 2 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-bold text-slate-900 font-display">
-                  Step 2: Personal & Professional Information
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Educational credentials, career background, height, and location.
-                </p>
-              </div>
-
+            <div className="space-y-4 animate-in fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -662,16 +834,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
 
           {/* STEP 3: Family Background */}
           {currentStep === 3 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-bold text-slate-900 font-display">
-                  Step 3: Family Background & Heritage
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Bengali marriage is a union of two families. Share parents and siblings info.
-                </p>
-              </div>
-
+            <div className="space-y-4 animate-in fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -798,16 +961,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
 
           {/* STEP 4: Partner Preference & Photos */}
           {currentStep === 4 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-bold text-slate-900 font-display">
-                  Step 4: Partner Preferences & Photos
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Describe your ideal match criteria and upload profile photo.
-                </p>
-              </div>
-
+            <div className="space-y-4 animate-in fade-in">
               {/* Photo Upload & Preview */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-5">
                 <div className="relative group shrink-0">
@@ -957,12 +1111,12 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
           )}
 
           {/* Nav Controls (Back & Next / Submit) */}
-          <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-6">
+          <div className="flex items-center justify-between pt-5 sm:pt-8 border-t border-slate-100 mt-6 gap-3">
             {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold transition-colors cursor-pointer min-h-[42px]"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
@@ -975,7 +1129,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-[#16205B] hover:bg-[#0f1744] text-white text-xs font-bold shadow-md shadow-indigo-900/10 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl bg-[#16205B] hover:bg-[#0f1744] text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-900/10 transition-colors cursor-pointer min-h-[42px]"
               >
                 Next Step
                 <ChevronRight className="w-4 h-4" />
@@ -984,7 +1138,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="inline-flex items-center gap-1.5 px-7 py-3 rounded-xl bg-[#D91B2B] hover:bg-[#b91422] text-white text-xs font-bold shadow-lg shadow-rose-600/20 hover:shadow-xl transition-all"
+                className="inline-flex items-center justify-center gap-1.5 px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#D91B2B] hover:bg-[#b91422] text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-600/20 hover:shadow-xl transition-all cursor-pointer min-h-[42px]"
               >
                 <Sparkles className="w-4 h-4" />
                 Submit Registration
