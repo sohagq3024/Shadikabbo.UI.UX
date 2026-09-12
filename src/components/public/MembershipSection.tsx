@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MembershipPlan } from '../../types';
+import { MembershipPlan, SiteSettings } from '../../types';
 import { MEMBERSHIP_PLANS } from '../../data/mockData';
 import { Check, Sparkles, Crown, ArrowRight, PhoneCall, ShieldCheck, Gem } from 'lucide-react';
 import { useToast } from '../common/Toast';
@@ -10,6 +10,8 @@ interface MembershipSectionProps {
   isLoggedIn: boolean;
   onOpenLogin: () => void;
   onOpenRegister: () => void;
+  plans?: MembershipPlan[];
+  siteSettings?: SiteSettings;
 }
 
 export const MembershipSection: React.FC<MembershipSectionProps> = ({
@@ -18,12 +20,14 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
   isLoggedIn,
   onOpenLogin,
   onOpenRegister,
+  plans,
+  siteSettings,
 }) => {
   const { showToast } = useToast();
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<MembershipPlan | null>(null);
 
   // Filter out any free plan so only the 3 paid premium tiers are displayed
-  const paidPlans = MEMBERSHIP_PLANS.filter((p) => p.id !== 'free');
+  const paidPlans = (plans && plans.length > 0 ? plans : MEMBERSHIP_PLANS).filter((p) => p.id !== 'free');
 
   const handlePlanClick = (plan: MembershipPlan) => {
     if (!isLoggedIn) {
@@ -53,15 +57,17 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
 
           <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-display tracking-tight text-white leading-tight uppercase">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2A42] via-[#FF4D61] to-[#ff7585] drop-shadow-[0_4px_24px_rgba(255,42,66,0.45)]">
-              Shadikabbo
+              {siteSettings?.membershipSectionTitle ? siteSettings.membershipSectionTitle.split(' ')[0] : 'Shadikabbo'}
             </span>{' '}
             <span className="text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-              Membership
+              {siteSettings?.membershipSectionTitle && siteSettings.membershipSectionTitle.split(' ').length > 1
+                ? siteSettings.membershipSectionTitle.split(' ').slice(1).join(' ')
+                : 'Membership'}
             </span>
           </h2>
 
           <p className="text-xs sm:text-sm md:text-base font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Choose the dignified package tailored to your family's matrimonial search
+            {siteSettings?.membershipSectionSubtitle || "Choose the dignified package tailored to your family's matrimonial search"}
           </p>
 
           <div className="flex items-center justify-center gap-3 pt-1">
@@ -243,20 +249,20 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
             </div>
             <div>
               <h4 className="text-sm sm:text-base font-bold text-white font-display">
-                Need Confidential VIP Executive Consultation?
+                {siteSettings?.callbackTitle || 'Need Confidential VIP Executive Consultation?'}
               </h4>
               <p className="text-[11px] sm:text-xs text-slate-300 max-w-lg mt-0.5">
-                For distinguished business families, physicians, bureaucrats, and overseas expatriates requiring private matrimonial representation.
+                {siteSettings?.callbackSubtitle || 'For distinguished business families, physicians, bureaucrats, and overseas expatriates requiring private matrimonial representation.'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center">
             <button
-              onClick={() => showToast('VIP Desk Connected', 'Our lead counselor Kabir (+880 1711-009988) has been requested for a confidential callback.', 'info')}
-              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-[11px] sm:text-xs font-bold transition-colors"
+              onClick={() => showToast('VIP Desk Connected', `${siteSettings?.callbackCounselor || 'Our lead counselor Kabir'} (${siteSettings?.callbackPhone || siteSettings?.helplinePhone1 || '+880 1711-009988'}) has been requested for a confidential callback.`, 'info')}
+              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-[11px] sm:text-xs font-bold transition-colors cursor-pointer"
             >
-              VIP Callback
+              {siteSettings?.callbackButtonText || 'VIP Callback'}
             </button>
             <button
               onClick={onOpenRegister}

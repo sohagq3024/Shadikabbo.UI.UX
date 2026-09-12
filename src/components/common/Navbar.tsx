@@ -99,7 +99,45 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const theme = getTheme();
 
-  // Mobile native app bottom navigation items - streamlined & compact
+  // Helper to determine whether a tab or group of tabs is active
+  const isTabActive = (tabId: string) => {
+    if (tabId === 'dashboard') {
+      return (
+        activeTab === 'dashboard' ||
+        activeTab === 'account' ||
+        activeTab === 'user-dashboard' ||
+        activeTab === 'user-proposals' ||
+        activeTab === 'user-edit-profile'
+      );
+    }
+    if (tabId === 'profiles') {
+      return activeTab === 'profiles' || activeTab === 'profile';
+    }
+    if (tabId === 'review') {
+      return activeTab === 'review' || activeTab === 'services';
+    }
+    if (tabId === 'admin') {
+      return (
+        activeTab === 'admin' ||
+        activeTab === 'admin-dashboard' ||
+        activeTab === 'admin-users' ||
+        activeTab === 'admin-my-assign' ||
+        activeTab === 'admin-account'
+      );
+    }
+    if (tabId === 'super_admin') {
+      return (
+        activeTab === 'super_admin' ||
+        activeTab === 'superadmin' ||
+        activeTab === 'superadmin-dashboard' ||
+        activeTab === 'superadmin-users' ||
+        activeTab === 'superadmin-admins'
+      );
+    }
+    return activeTab === tabId;
+  };
+
+  // Mobile native app bottom navigation items - streamlined
   const getMobileNavItems = () => {
     if (currentRole === 'guest') {
       return [
@@ -111,32 +149,31 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
     if (currentRole === 'user') {
       return [
-        { id: 'user-dashboard', label: 'Home', Icon: LayoutDashboard },
-        { id: 'profiles', label: 'Matches', Icon: Search },
+        { id: 'home', label: 'Home', Icon: Home },
+        { id: 'profiles', label: 'Profile', Icon: Search },
+        { id: 'review', label: 'Review', Icon: MessageSquareHeart },
         {
-          id: 'user-proposals',
-          label: 'Proposals',
-          Icon: Inbox,
+          id: 'dashboard',
+          label: 'My Account',
+          Icon: User,
           badge: receivedProposalsCount > 0 ? receivedProposalsCount : undefined,
         },
-        { id: 'review', label: 'Review', Icon: MessageSquareHeart },
-        { id: 'membership', label: 'Plan', Icon: Crown },
       ];
     }
     if (currentRole === 'admin') {
       return [
-        { id: 'admin-dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-        { id: 'admin-users', label: 'Users', Icon: UserCheck },
+        { id: 'home', label: 'Home', Icon: Home },
+        { id: 'profiles', label: 'Candidates', Icon: Search },
         { id: 'review', label: 'Review', Icon: MessageSquareHeart },
-        { id: 'admin-my-assign', label: 'Assigned', Icon: Heart },
+        { id: 'admin', label: 'Admin Desk', Icon: Shield },
       ];
     }
     // Superadmin
     return [
-      { id: 'superadmin-dashboard', label: 'Console', Icon: LayoutDashboard },
-      { id: 'superadmin-users', label: 'Candidates', Icon: UserCheck },
+      { id: 'home', label: 'Home', Icon: Home },
+      { id: 'profiles', label: 'Candidates', Icon: Search },
       { id: 'review', label: 'Review', Icon: MessageSquareHeart },
-      { id: 'superadmin-admins', label: 'Admins', Icon: Shield },
+      { id: 'super_admin', label: 'Super Console', Icon: Shield },
     ];
   };
 
@@ -179,46 +216,46 @@ export const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={() => handleNavClick('home')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'home' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('home') ? theme.navActive : theme.navDefault
                   }`}
                 >
                   Home
-                  {activeTab !== 'home' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#E60000] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  {!isTabActive('home') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
                 <button
                   onClick={() => handleNavClick('review')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('review') ? theme.navActive : theme.navDefault
                   }`}
                 >
                   Review
-                  {activeTab !== 'review' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#E60000] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  {!isTabActive('review') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
                 <button
                   onClick={() => handleNavClick('membership')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'membership' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('membership') ? theme.navActive : theme.navDefault
                   }`}
                 >
                   Membership
-                  {activeTab !== 'membership' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#E60000] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  {!isTabActive('membership') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
                 <button
                   onClick={() => handleNavClick('stories')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'stories' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('stories') ? theme.navActive : theme.navDefault
                   }`}
                 >
                   Success Stories
-                  {activeTab !== 'stories' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#E60000] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  {!isTabActive('stories') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
               </>
@@ -227,57 +264,53 @@ export const Navbar: React.FC<NavbarProps> = ({
             {currentRole === 'user' && (
               <>
                 <button
-                  onClick={() => handleNavClick('user-dashboard')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'user-dashboard' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('home')}
+                  className={`group relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('home') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Dashboard
+                  Home
+                  {!isTabActive('home') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  )}
                 </button>
                 <button
                   onClick={() => handleNavClick('profiles')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'profiles' ? theme.navActive : theme.navDefault
+                  className={`group relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('profiles') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Browse Matches
-                </button>
-                <button
-                  onClick={() => handleNavClick('user-proposals')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center ${
-                    activeTab === 'user-proposals' ? theme.navActive : theme.navDefault
-                  }`}
-                >
-                  <span>Proposals</span>
-                  {receivedProposalsCount > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-[#E60000] text-white border border-white/40 shadow-xs animate-pulse">
-                      {receivedProposalsCount}
-                    </span>
+                  Profile
+                  {!isTabActive('profiles') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
                   )}
                 </button>
                 <button
                   onClick={() => handleNavClick('review')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  className={`group relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                    isTabActive('review') ? theme.navActive : theme.navDefault
                   }`}
                 >
                   Review
+                  {!isTabActive('review') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  )}
                 </button>
                 <button
-                  onClick={() => handleNavClick('user-edit-profile')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'user-edit-profile' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('dashboard')}
+                  className={`group relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                    isTabActive('dashboard') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  My Biodata
-                </button>
-                <button
-                  onClick={() => handleNavClick('membership')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'membership' ? theme.navActive : theme.navDefault
-                  }`}
-                >
-                  My Plan
+                  <span>My Account</span>
+                  {receivedProposalsCount > 0 && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-black rounded-full bg-[#D91B2B] text-white shadow-2xs">
+                      {receivedProposalsCount}
+                    </span>
+                  )}
+                  {!isTabActive('dashboard') && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#D91B2B] group-hover:w-1/2 transition-all duration-300 rounded-full" />
+                  )}
                 </button>
               </>
             )}
@@ -285,44 +318,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             {currentRole === 'admin' && (
               <>
                 <button
-                  onClick={() => handleNavClick('admin-dashboard')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'admin-dashboard' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('home')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('home') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Admin Overview
+                  Home
                 </button>
                 <button
-                  onClick={() => handleNavClick('admin-users')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'admin-users' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('profiles')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('profiles') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  All Users
+                  Candidates
                 </button>
                 <button
                   onClick={() => handleNavClick('review')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('review') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Timeline Review
+                  Review
                 </button>
                 <button
-                  onClick={() => handleNavClick('admin-my-assign')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'admin-my-assign' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('admin')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('admin') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  My Assigned Users
-                </button>
-                <button
-                  onClick={() => handleNavClick('admin-account')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'admin-account' ? theme.navActive : theme.navDefault
-                  }`}
-                >
-                  Admin Profile
+                  Admin Desk
                 </button>
               </>
             )}
@@ -330,44 +355,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             {(currentRole === 'superadmin' || currentRole === 'super_admin') && (
               <>
                 <button
-                  onClick={() => handleNavClick('superadmin-dashboard')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'superadmin-dashboard' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('home')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('home') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Super Overview
+                  Home
                 </button>
                 <button
-                  onClick={() => handleNavClick('admin-users')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'admin-users' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('profiles')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('profiles') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  All Users
+                  Candidates
                 </button>
                 <button
                   onClick={() => handleNavClick('review')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'review' ? theme.navActive : theme.navDefault
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('review') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  Timeline Review
+                  Review
                 </button>
                 <button
-                  onClick={() => handleNavClick('superadmin-users')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'superadmin-users' ? theme.navActive : theme.navDefault
+                  onClick={() => handleNavClick('super_admin')}
+                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isTabActive('super_admin') ? theme.navActive : theme.navDefault
                   }`}
                 >
-                  All Candidates
-                </button>
-                <button
-                  onClick={() => handleNavClick('superadmin-admins')}
-                  className={`group relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    activeTab === 'superadmin-admins' ? theme.navActive : theme.navDefault
-                  }`}
-                >
-                  Staff Accounts
+                  Super Console
                 </button>
               </>
             )}
@@ -412,6 +429,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         ? 'Super Admin'
                         : currentUser?.role === 'admin'
                         ? 'Relationship Mgr'
+                        : currentUser?.membershipPlan === 'free'
+                        ? 'Free Member'
                         : `${currentUser?.membershipPlan} Member`}
                     </span>
                   </div>
@@ -429,29 +448,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {currentRole === 'user' && (
                       <>
                         <button
-                          onClick={() => handleNavClick('user-dashboard')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          onClick={() => handleNavClick('dashboard')}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <User className="w-3.5 h-3.5 text-blue-400" />
-                          Dashboard Overview
+                          My Account Overview
                         </button>
                         <button
                           onClick={() => handleNavClick('user-edit-profile')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Heart className="w-3.5 h-3.5 text-rose-400" />
                           Edit Matrimonial Biodata
                         </button>
                         <button
                           onClick={() => handleNavClick('user-proposals')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Inbox className="w-3.5 h-3.5 text-sky-400" />
                           Proposal Requests
                         </button>
                         <button
                           onClick={() => handleNavClick('membership')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Crown className="w-3.5 h-3.5 text-amber-400" />
                           Membership & Upgrades
@@ -462,18 +481,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {currentRole === 'admin' && (
                       <>
                         <button
-                          onClick={() => handleNavClick('admin-dashboard')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          onClick={() => handleNavClick('admin')}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Shield className="w-3.5 h-3.5 text-indigo-400" />
-                          Admin Overview
+                          Admin Desk Overview
                         </button>
                         <button
-                          onClick={() => handleNavClick('admin-my-assign')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          onClick={() => handleNavClick('profiles')}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          My Assigned Candidates
+                          All Candidates
                         </button>
                       </>
                     )}
@@ -481,18 +500,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {(currentRole === 'superadmin' || currentRole === 'super_admin') && (
                       <>
                         <button
-                          onClick={() => handleNavClick('superadmin-dashboard')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          onClick={() => handleNavClick('super_admin')}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Crown className="w-3.5 h-3.5 text-rose-400" />
                           Super Admin Console
                         </button>
                         <button
-                          onClick={() => handleNavClick('superadmin-admins')}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors ${theme.dropdownItem}`}
+                          onClick={() => handleNavClick('profiles')}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-xl text-left transition-colors cursor-pointer ${theme.dropdownItem}`}
                         >
                           <Shield className="w-3.5 h-3.5 text-amber-400" />
-                          Admin Staff Accounts
+                          Candidates & Staff
                         </button>
                       </>
                     )}
@@ -554,10 +573,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() =>
                     handleNavClick(
                       currentRole === 'user'
-                        ? 'user-dashboard'
+                        ? 'dashboard'
                         : currentRole === 'admin'
-                        ? 'admin-dashboard'
-                        : 'superadmin-dashboard'
+                        ? 'admin'
+                        : 'super_admin'
                     )
                   }
                   className="flex items-center gap-1.5 p-0.5 pr-2 rounded-full border border-slate-200/90 bg-slate-50/90 text-slate-800 shadow-2xs cursor-pointer active:scale-95"
@@ -589,54 +608,56 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
     </header>
 
-    {/* Mobile Native App Bottom Navigation Bar - Ultra-Slim Floating Luxury Dock */}
-    <nav
-      id="mobile-bottom-bar"
-      className="lg:hidden fixed bottom-2 inset-x-2 sm:inset-x-8 max-w-lg mx-auto z-40 bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/90 shadow-[0_8px_30px_-4px_rgba(2,6,31,0.14),0_2px_8px_rgba(0,0,0,0.04)] px-1.5 py-1 flex items-center justify-around select-none"
-      aria-label="Mobile Bottom Navigation"
-    >
-      {/* Subtle luxury micro hairline glow */}
-      <div className="absolute -top-[1px] inset-x-6 h-[1px] bg-gradient-to-r from-transparent via-[#D91B2B]/25 to-transparent pointer-events-none rounded-full" />
+    {/* Mobile Native App Bottom Navigation Bar - Ultra-Slim Floating Luxury Dock (Hidden on web-only Super Admin console) */}
+    {!isTabActive('super_admin') && (
+      <nav
+        id="mobile-bottom-bar"
+        className="lg:hidden fixed bottom-2 inset-x-2 sm:inset-x-8 max-w-lg mx-auto z-40 bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/90 shadow-[0_8px_30px_-4px_rgba(2,6,31,0.14),0_2px_8px_rgba(0,0,0,0.04)] px-1.5 py-1 flex items-center justify-around select-none"
+        aria-label="Mobile Bottom Navigation"
+      >
+        {/* Subtle luxury micro hairline glow */}
+        <div className="absolute -top-[1px] inset-x-6 h-[1px] bg-gradient-to-r from-transparent via-[#D91B2B]/25 to-transparent pointer-events-none rounded-full" />
 
-      {getMobileNavItems().map((item) => {
-        const isActive = activeTab === item.id;
-        const IconComponent = item.Icon;
-        return (
-          <button
-            key={item.id}
-            onClick={() => handleNavClick(item.id)}
-            className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 ${
-              isActive ? 'text-[#D91B2B]' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {/* Active subtle luxury pill highlight */}
-            {isActive && (
-              <span className="absolute inset-0.5 bg-gradient-to-b from-rose-50/90 to-red-50/50 rounded-xl border border-rose-200/70 shadow-2xs -z-0" />
-            )}
-
-            <div className="relative z-10 flex items-center justify-center">
-              <IconComponent
-                className={`w-4 h-4 transition-all duration-200 ${
-                  isActive ? 'text-[#D91B2B] stroke-[2.2]' : 'text-slate-400 stroke-[1.8]'
-                }`}
-              />
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -top-1.5 -right-2 px-1 min-w-[13px] h-[13px] text-[8px] font-black bg-[#D91B2B] text-white rounded-full flex items-center justify-center border border-white shadow-2xs">
-                  {item.badge}
-                </span>
-              )}
-            </div>
-            <span
-              className={`relative z-10 text-[9px] font-semibold tracking-tight mt-0.5 whitespace-nowrap leading-none transition-colors ${
-                isActive ? 'text-[#D91B2B]' : 'text-slate-500'
+        {getMobileNavItems().map((item) => {
+          const isActive = isTabActive(item.id);
+          const IconComponent = item.Icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              className={`relative flex flex-col items-center justify-center flex-1 min-h-[46px] py-1 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 ${
+                isActive ? 'text-[#D91B2B]' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              {item.label}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
+              {/* Active subtle luxury pill highlight */}
+              {isActive && (
+                <span className="absolute inset-0.5 bg-gradient-to-b from-rose-50/90 to-red-50/50 rounded-xl border border-rose-200/70 shadow-2xs -z-0" />
+              )}
+
+              <div className="relative z-10 flex items-center justify-center">
+                <IconComponent
+                  className={`w-4 h-4 transition-all duration-200 ${
+                    isActive ? 'text-[#D91B2B] stroke-[2.2]' : 'text-slate-500 stroke-[1.8]'
+                  }`}
+                />
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 px-1 min-w-[13px] h-[13px] text-[8px] font-black bg-[#D91B2B] text-white rounded-full flex items-center justify-center border border-white shadow-2xs">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              <span
+                className={`relative z-10 text-[9px] font-semibold tracking-tight mt-0.5 whitespace-nowrap leading-none transition-colors ${
+                  isActive ? 'text-[#D91B2B]' : 'text-slate-600'
+                }`}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    )}
   </>
 );
 };

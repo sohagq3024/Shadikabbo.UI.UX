@@ -5,6 +5,7 @@ import {
   MembershipPlan,
   SuccessStory,
   MatchmakingService,
+  SiteSettings,
 } from '../types';
 
 export const DEMO_USERS: UserAccount[] = [
@@ -15,7 +16,7 @@ export const DEMO_USERS: UserAccount[] = [
     role: 'user',
     phone: '+880 1711-234567',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-    membershipPlan: 'standard',
+    membershipPlan: 'free',
     createdAt: '2025-10-15',
     status: 'active',
     assignedAdminId: 'adm-001',
@@ -41,6 +42,18 @@ export const DEMO_USERS: UserAccount[] = [
     role: 'super_admin',
     phone: '+880 1912-778899',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face',
+    membershipPlan: 'special',
+    createdAt: '2023-01-01',
+    status: 'active',
+    password: 'superadmin096',
+  },
+  {
+    id: 'sup-002',
+    name: 'Nasrin Islam (Super Admin)',
+    email: 'nasrinislam0969661@gmail.com',
+    role: 'super_admin',
+    phone: '+880 1912-096966',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face',
     membershipPlan: 'special',
     createdAt: '2023-01-01',
     status: 'active',
@@ -762,4 +775,105 @@ export const MOCK_PROPOSALS = [
     message: 'Dear Nadia, your creative architectural pursuit and global lifestyle resonated deeply. Would love to initiate conversation with family blessings.',
   },
 ];
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  noticeEnabled: true,
+  noticeText: 'শুভ উদ্বোধন উপলক্ষে সকল মেম্বারশিপ প্যাকেজে বিশেষ ছাড় চলছে! ভেরিফাইড পাত্র-পাত্রী খুঁজতে এখনই রেজিস্ট্রেশন করুন। হেল্পলাইন: +880 1711-009988',
+  noticeBadge: 'জরুরি নোটিশ',
+
+  helplinePhone1: '+880 1711-009988',
+  helplinePhone2: '+880 9612-445566',
+  whatsappNumber: '+880 1711-009988',
+  supportEmail: 'support@shadikabbo.com',
+  officeAddress: 'Level 7, Concord Tower, Gulshan-2, Dhaka-1212, Bangladesh',
+
+  bkashNumber: '01711-009988 (Merchant/Personal)',
+  nagadNumber: '01912-778899 (Merchant/Personal)',
+  rocketNumber: '01819-334455 (Personal)',
+  paymentNotice: 'পেমেন্ট রেফারেন্সে আপনার প্রোফাইল আইডি (যেমন: SK-2041) উল্লেখ করুন এবং ট্রানজেকশন আইডি প্রদান করুন।',
+
+  heroHeadline: 'Where Dignified Hearts & Families',
+  heroHighlight: 'Unite For A Lifetime',
+  heroSubtitle: 'Choose the dignified matrimonial search tailored to your family.',
+  statProfilesCount: '25,000+ Verified Candidates',
+  statWeddingsCount: '4,850+ Weddings',
+  statTrustBadge: '100% NID & Family Privacy',
+
+  // Hero Right 3 Mobile Frames
+  heroLeftPhone: {
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+    nameAge: 'Tariqur Rahman, 29',
+    professionCity: 'Sr. Architect • London, UK',
+  },
+  heroCenterPhone: {
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
+    nameAge: 'Dr. Anika Tabassum, 26',
+    professionCity: 'Doctor (MBBS) • Dhaka, Bangladesh',
+  },
+  heroRightPhone: {
+    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
+    nameAge: 'Nusrat Jahan, 24',
+    professionCity: 'Lecturer in English • Chittagong',
+  },
+
+  // Featured Profiles
+  featuredSectionTitle: 'Featured Profiles',
+  featuredSectionSubtitle: 'Handpicked and verified biodatas ready for meaningful matrimonial connections.',
+  featuredProfileIds: ['prof-001', 'prof-002', 'prof-003'],
+
+  // Membership Section
+  membershipSectionTitle: 'Transparent, Dignified Membership Plans',
+  membershipSectionSubtitle: 'Select an honorable tier tailored for your family or individual matchmaking path.',
+
+  // Country & Expat Community
+  countrySectionTitle: 'Find Matches by Country & Expat Community',
+  countrySectionSubtitle: 'Connect with eligible Bengali candidates residing locally across Bangladesh or settled in key global diaspora hubs worldwide.',
+  countryCards: [
+    {
+      id: 'bd',
+      name: 'Bangladesh',
+      flag: '🇧🇩',
+      cityName: 'Dhaka City',
+      highlight: 'Metropolitan & Heritage',
+      image: 'https://images.unsplash.com/photo-1585123388867-3bfe6dd4bdbf?w=800&auto=format&fit=crop&q=80',
+      candidateCount: '15,200+ Candidates',
+    },
+    {
+      id: 'usa',
+      name: 'United States',
+      flag: '🇺🇸',
+      cityName: 'New York City',
+      highlight: 'Manhattan & Expat Hubs',
+      image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&auto=format&fit=crop&q=80',
+      candidateCount: '4,100+ Candidates',
+    },
+    {
+      id: 'uk',
+      name: 'United Kingdom',
+      flag: '🇬🇧',
+      cityName: 'London',
+      highlight: 'Greater London & Diaspora',
+      image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&auto=format&fit=crop&q=80',
+      candidateCount: '2,950+ Candidates',
+    },
+    {
+      id: 'canada',
+      name: 'Canada',
+      flag: '🇨🇦',
+      cityName: 'Toronto',
+      highlight: 'Downtown & Ontario Hub',
+      image: 'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=800&auto=format&fit=crop&q=80',
+      candidateCount: '2,100+ Candidates',
+    },
+  ],
+
+  // Callback & Helpline
+  callbackTitle: 'Need Confidential VIP Executive Consultation?',
+  callbackSubtitle: 'For distinguished business families, physicians, bureaucrats, and overseas expatriates requiring private matrimonial representation.',
+  callbackPhone: '+880 1711-009988',
+  callbackCounselor: 'Our lead counselor Kabir',
+  callbackButtonText: 'VIP Callback',
+  authorityDeskHours: 'সকাল ১০:০০ - রাত ১০:০০',
+  authorityDeskTagline: 'শাদী কাব্য অফিসিয়াল রিলেশনশিপ সার্ভিস',
+};
 

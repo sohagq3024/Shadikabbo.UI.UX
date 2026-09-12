@@ -1,15 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrandLogo } from '../common/BrandLogo';
-import { MatrimonialProfile, UserAccount } from '../../types';
+import { MatrimonialProfile, UserAccount, FamilyMember } from '../../types';
 import {
   Check,
   ChevronRight,
   ChevronLeft,
   ChevronDown,
   Upload,
+  UploadCloud,
+  Image as ImageIcon,
   User,
   Briefcase,
   Users,
+  UserPlus,
+  Plus,
+  Trash2,
   Heart,
   Sparkles,
   ShieldCheck,
@@ -17,34 +22,23 @@ import {
   Lock,
   Camera,
   X,
+  MapPin,
+  Home,
 } from 'lucide-react';
 import { useToast } from '../common/Toast';
+import {
+  FEATURED_COUNTRIES,
+  ALL_WORLD_COUNTRIES,
+  getCitiesForCountry,
+} from '../../data/locationData';
+import { PROFESSION_GROUPS } from '../../data/professionData';
 
-interface CountryOption {
-  id: string;
-  code: string;
-  dialCode: string;
-  name: string;
-}
-
-const COUNTRY_OPTIONS: CountryOption[] = [
-  { id: '+880', code: 'bd', dialCode: '+880', name: 'Bangladesh' },
-  { id: '+1_US', code: 'us', dialCode: '+1', name: 'United States' },
-  { id: '+1_CA', code: 'ca', dialCode: '+1', name: 'Canada' },
-  { id: '+61', code: 'au', dialCode: '+61', name: 'Australia' },
-  { id: '+44', code: 'gb', dialCode: '+44', name: 'United Kingdom' },
-  { id: '+971', code: 'ae', dialCode: '+971', name: 'United Arab Emirates' },
-  { id: '+966', code: 'sa', dialCode: '+966', name: 'Saudi Arabia' },
-  { id: '+60', code: 'my', dialCode: '+60', name: 'Malaysia' },
-  { id: '+65', code: 'sg', dialCode: '+65', name: 'Singapore' },
-  { id: '+91', code: 'in', dialCode: '+91', name: 'India' },
-  { id: '+39', code: 'it', dialCode: '+39', name: 'Italy' },
-  { id: '+49', code: 'de', dialCode: '+49', name: 'Germany' },
-  { id: '+33', code: 'fr', dialCode: '+33', name: 'France' },
-  { id: '+974', code: 'qa', dialCode: '+974', name: 'Qatar' },
-  { id: '+965', code: 'kw', dialCode: '+965', name: 'Kuwait' },
-  { id: '+968', code: 'om', dialCode: '+968', name: 'Oman' },
-];
+import {
+  CountryOption,
+  COUNTRY_OPTIONS,
+  EducationOptionGroup,
+  EDUCATION_QUALIFICATION_GROUPS,
+} from '../../data/registrationOptions';
 
 interface RegistrationFlowProps {
   onCancel: () => void;
@@ -59,7 +53,14 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isCustomEducation, setIsCustomEducation] = useState(false);
+  const [isCustomProfession, setIsCustomProfession] = useState(false);
+  const [isCustomPresentCity, setIsCustomPresentCity] = useState(false);
+  const [isCustomPermanentCity, setIsCustomPermanentCity] = useState(false);
+  const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -74,14 +75,14 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Form states matching user specs
+  // Form states matching user specs - No default pre-selected values so user must choose
   const [formData, setFormData] = useState({
     // Step 1: Basic
     candidateName: '',
     candidateNameBangla: '',
-    createdFor: 'Self' as MatrimonialProfile['createdFor'],
-    gender: 'Male' as 'Male' | 'Female',
-    dateOfBirth: '1998-05-15',
+    createdFor: '' as MatrimonialProfile['createdFor'],
+    gender: '' as 'Male' | 'Female' | '',
+    dateOfBirth: '',
     countryCode: '+880',
     contactNumber: '',
     email: '',
@@ -89,43 +90,45 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
     confirmPassword: '',
 
     // Step 2: Personal & Career
-    education: 'B.Sc. in Computer Science & Engineering',
-    highestDegree: 'Graduation',
-    institution: 'BUET / Dhaka University',
-    profession: 'Software Engineer',
-    jobTitle: 'Senior Software Engineer',
-    jobType: 'Private' as MatrimonialProfile['jobType'],
-    monthlyIncome: '৳ 1,50,000+',
-    maritalStatus: 'Never Married' as MatrimonialProfile['maritalStatus'],
-    height: `5' 8" (173 cm)`,
-    presentCountry: 'Bangladesh',
-    presentCity: 'Dhaka',
-    presentAddress: 'Dhanmondi, Dhaka',
-    permanentDistrict: 'Dhaka',
-    permanentAddress: 'Dhanmondi, Dhaka',
+    education: '',
+    highestDegree: '',
+    institution: '',
+    profession: '',
+    jobTitle: '',
+    jobType: '' as MatrimonialProfile['jobType'],
+    monthlyIncome: '',
+    maritalStatus: '' as MatrimonialProfile['maritalStatus'],
+    height: '',
+    presentCountry: '',
+    presentCity: '',
+    presentAddress: '',
+    permanentCountry: '',
+    permanentDistrict: '',
+    permanentAddress: '',
 
     // Step 3: Family
     fatherName: '',
     fatherProfession: '',
     motherName: '',
     motherProfession: '',
-    brotherCount: 1,
-    brotherDetails: '1 Brother (Studying)',
+    familyMembers: [] as FamilyMember[],
+    brotherCount: 0,
+    brotherDetails: '',
     sisterCount: 0,
     sisterDetails: '',
     familyValues: 'Moderate' as MatrimonialProfile['familyValues'],
     economicStatus: 'Upper Middle Class' as MatrimonialProfile['economicStatus'],
-    familyNotes: 'Educated, respected family with strong moral principles.',
+    familyNotes: '',
 
     // Step 4: Preferences & Media
     partnerMinAge: 22,
     partnerMaxAge: 28,
     partnerMinHeight: `5' 2"`,
-    partnerEducation: 'Graduation / Post Graduation',
-    partnerProfession: 'Doctor, Engineer, Banker or Corporate',
-    partnerLocation: 'Dhaka, Sylhet, or Expat (USA/Canada)',
-    partnerNotes: 'Looking for a kind, respectful, and family-oriented companion.',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&h=500&fit=crop',
+    partnerEducation: '',
+    partnerProfession: '',
+    partnerLocation: '',
+    partnerNotes: '',
+    avatar: '',
     photoPrivacy: 'Public' as MatrimonialProfile['photoPrivacy'],
   });
 
@@ -133,10 +136,172 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const processPhotoFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Invalid File Type', 'Please upload an image file (JPG, PNG, WEBP).', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('File Too Large', 'Please select an image smaller than 5MB.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        updateField('avatar', e.target.result as string);
+        showToast('Photo Uploaded', 'Candidate photograph uploaded successfully.', 'success');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processPhotoFile(file);
+    }
+  };
+
+  const handleDropPhoto = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingPhoto(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processPhotoFile(file);
+    }
+  };
+
+  const handleDragOverPhoto = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingPhoto(true);
+  };
+
+  const handleDragLeavePhoto = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingPhoto(false);
+  };
+
+  const addFamilyMember = () => {
+    setFormData((prev) => ({
+      ...prev,
+      familyMembers: [
+        ...(prev.familyMembers || []),
+        {
+          id: 'fm-' + Math.random().toString(36).substring(2, 9),
+          name: '',
+          relationship: '',
+          profession: '',
+        },
+      ],
+    }));
+  };
+
+  const updateFamilyMember = (index: number, field: keyof FamilyMember, value: string) => {
+    setFormData((prev) => {
+      const current = prev.familyMembers || [];
+      const updated = [...current];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, familyMembers: updated };
+    });
+  };
+
+  const removeFamilyMember = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyMembers: (prev.familyMembers || []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleToggleSameAddress = (checked: boolean) => {
+    setSameAsPresentAddress(checked);
+    if (checked) {
+      setFormData((prev) => ({
+        ...prev,
+        permanentCountry: prev.presentCountry,
+        permanentDistrict: prev.presentCity,
+        permanentAddress: prev.presentAddress,
+      }));
+    }
+  };
+
+  const handlePresentCountryChange = (country: string) => {
+    setIsCustomPresentCity(false);
+    setFormData((prev) => ({
+      ...prev,
+      presentCountry: country,
+      presentCity: '',
+      ...(sameAsPresentAddress
+        ? { permanentCountry: country, permanentDistrict: '' }
+        : {}),
+    }));
+  };
+
+  const handlePermanentCountryChange = (country: string) => {
+    setIsCustomPermanentCity(false);
+    setFormData((prev) => ({
+      ...prev,
+      permanentCountry: country,
+      permanentDistrict: '',
+    }));
+  };
+
+  const handleProfessionChange = (val: string) => {
+    if (val === 'Other Profession (Specify below)') {
+      setIsCustomProfession(true);
+      updateField('profession', '');
+    } else {
+      setIsCustomProfession(false);
+      updateField('profession', val);
+      if (
+        val.includes('BCS') ||
+        val.includes('Government Officer') ||
+        val.includes('Armed Forces') ||
+        val.includes('Judicial')
+      ) {
+        updateField('jobType', 'Government');
+      } else if (
+        val.includes('Doctor') ||
+        val.includes('Surgeon') ||
+        val.includes('Physician')
+      ) {
+        updateField('jobType', 'Doctor');
+      } else if (val.includes('Engineer') || val.includes('Architect')) {
+        updateField('jobType', 'Engineer');
+      } else if (
+        val.includes('Business') ||
+        val.includes('Entrepreneur') ||
+        val.includes('Industrialist')
+      ) {
+        updateField('jobType', 'Business');
+      } else if (val.includes('Freelancer') || val.includes('Remote')) {
+        updateField('jobType', 'Freelance');
+      } else if (val.includes('Corporate Executive') || val.includes('MNC')) {
+        updateField('jobType', 'Multinational');
+      } else if (val.includes('Bank')) {
+        updateField('jobType', 'Private');
+      }
+    }
+  };
+
   const validateStep = (step: number): boolean => {
     if (step === 1) {
       if (!formData.candidateName.trim()) {
         showToast('Candidate Name Required', 'Please provide the candidate full name.', 'error');
+        return false;
+      }
+      if (!formData.createdFor) {
+        showToast('Profile For Required', 'Please select who this profile is being created for.', 'error');
+        return false;
+      }
+      if (!formData.gender) {
+        showToast('Gender Required', 'Please select candidate gender (Male or Female).', 'error');
+        return false;
+      }
+      if (!formData.dateOfBirth) {
+        showToast('Date of Birth Required', 'Please select candidate date of birth.', 'error');
         return false;
       }
       if (!formData.contactNumber.trim()) {
@@ -156,13 +321,64 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
         return false;
       }
     } else if (step === 2) {
-      if (!formData.profession.trim() || !formData.presentAddress.trim()) {
-        showToast('Details Required', 'Please complete your profession and address.', 'error');
+      if (!formData.education.trim()) {
+        showToast('Education Required', 'Please select your educational qualification.', 'error');
         return false;
       }
+      if (!formData.profession.trim()) {
+        showToast('Profession Required', 'Please select or enter your profession.', 'error');
+        return false;
+      }
+      if (!formData.jobType) {
+        showToast('Job Sector Required', 'Please select job sector / type.', 'error');
+        return false;
+      }
+      if (!formData.maritalStatus) {
+        showToast('Marital Status Required', 'Please select marital status.', 'error');
+        return false;
+      }
+      if (!formData.height) {
+        showToast('Height Required', 'Please select candidate height.', 'error');
+        return false;
+      }
+      if (!formData.presentCountry.trim()) {
+        showToast('Present Country Required', 'Please select present country.', 'error');
+        return false;
+      }
+      if (!formData.presentCity.trim()) {
+        showToast('Present City Required', 'Please select present city or district.', 'error');
+        return false;
+      }
+      if (!sameAsPresentAddress) {
+        if (!formData.permanentCountry.trim()) {
+          showToast('Permanent Country Required', 'Please select permanent country.', 'error');
+          return false;
+        }
+        if (!formData.permanentDistrict.trim()) {
+          showToast('Permanent City Required', 'Please select permanent city or district.', 'error');
+          return false;
+        }
+      }
     } else if (step === 3) {
-      if (!formData.fatherName.trim() || !formData.motherName.trim()) {
-        showToast('Family Details Required', 'Please enter father and mother names.', 'error');
+      if (!formData.fatherName.trim()) {
+        showToast("Father's Name Required", "Please enter candidate's father's name.", 'error');
+        return false;
+      }
+      if (!formData.fatherProfession.trim()) {
+        showToast("Father's Profession Required", "Please enter father's profession or designation.", 'error');
+        return false;
+      }
+      if (!formData.motherName.trim()) {
+        showToast("Mother's Name Required", "Please enter candidate's mother's name.", 'error');
+        return false;
+      }
+      if (!formData.motherProfession.trim()) {
+        showToast("Mother's Profession Required", "Please enter mother's profession (or Homemaker).", 'error');
+        return false;
+      }
+    } else if (step === 4) {
+      if (!formData.avatar) {
+        showToast("Profile Photo Required", "Please upload a photo of the candidate before completing registration.", 'error');
         return false;
       }
     }
@@ -231,19 +447,43 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
       presentCountry: formData.presentCountry,
       presentCity: formData.presentCity,
       presentAddress: formData.presentAddress,
+      permanentCountry: formData.permanentCountry || formData.presentCountry,
       permanentDistrict: formData.permanentDistrict,
       permanentAddress: formData.permanentAddress,
       fatherName: formData.fatherName,
       fatherProfession: formData.fatherProfession,
       motherName: formData.motherName,
       motherProfession: formData.motherProfession,
-      brotherCount: formData.brotherCount,
-      brotherDetails: formData.brotherDetails,
-      sisterCount: formData.sisterCount,
-      sisterDetails: formData.sisterDetails,
-      familyValues: formData.familyValues,
-      economicStatus: formData.economicStatus,
-      familyNotes: formData.familyNotes,
+      familyMembers: formData.familyMembers || [],
+      brotherCount: (formData.familyMembers || []).filter(
+        (m) =>
+          m.relationship.toLowerCase().includes('brother') ||
+          m.relationship.includes('ভাই')
+      ).length,
+      brotherDetails: (formData.familyMembers || [])
+        .filter(
+          (m) =>
+            m.relationship.toLowerCase().includes('brother') ||
+            m.relationship.includes('ভাই')
+        )
+        .map((m) => `${m.name ? m.name + ': ' : ''}${m.relationship}${m.profession ? ' (' + m.profession + ')' : ''}`)
+        .join(', '),
+      sisterCount: (formData.familyMembers || []).filter(
+        (m) =>
+          m.relationship.toLowerCase().includes('sister') ||
+          m.relationship.includes('বোন')
+      ).length,
+      sisterDetails: (formData.familyMembers || [])
+        .filter(
+          (m) =>
+            m.relationship.toLowerCase().includes('sister') ||
+            m.relationship.includes('বোন')
+        )
+        .map((m) => `${m.name ? m.name + ': ' : ''}${m.relationship}${m.profession ? ' (' + m.profession + ')' : ''}`)
+        .join(', '),
+      familyValues: 'Moderate',
+      economicStatus: 'Upper Middle Class',
+      familyNotes: '',
       partnerMinAge: formData.partnerMinAge,
       partnerMaxAge: formData.partnerMaxAge,
       partnerMinHeight: formData.partnerMinHeight,
@@ -453,33 +693,18 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
           {currentStep === 1 && (
             <div className="space-y-4 animate-in fade-in">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Candidate Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.candidateName}
-                    onChange={(e) => updateField('candidateName', e.target.value)}
-                    placeholder="e.g. Farhan Ahmed"
-                    required
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Name in Bengali (ঐচ্ছিক)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.candidateNameBangla}
-                    onChange={(e) => updateField('candidateNameBangla', e.target.value)}
-                    placeholder="e.g. ফারহান আহমেদ"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Candidate Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.candidateName}
+                  onChange={(e) => updateField('candidateName', e.target.value)}
+                  placeholder="e.g. Farhan Ahmed"
+                  required
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -490,15 +715,16 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                   <select
                     value={formData.createdFor}
                     onChange={(e) => updateField('createdFor', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
                   >
-                    <option value="Self">Self (নিজ)</option>
-                    <option value="Son">Son (ছেলে)</option>
-                    <option value="Daughter">Daughter (মেয়ে)</option>
-                    <option value="Brother">Brother (ভাই)</option>
-                    <option value="Sister">Sister (বোন)</option>
-                    <option value="Friend">Friend (বন্ধু)</option>
-                    <option value="Relative">Relative (আত্মীয়)</option>
+                    <option value="">-- Select Profile Creator --</option>
+                    <option value="Self">Self</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Relative">Relative</option>
                   </select>
                 </div>
 
@@ -510,24 +736,24 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                     <button
                       type="button"
                       onClick={() => updateField('gender', 'Male')}
-                      className={`py-2 text-xs font-bold rounded-xl border transition-all ${
+                      className={`py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                         formData.gender === 'Male'
-                          ? 'bg-[#16205B] text-white border-[#16205B]'
-                          : 'bg-slate-50 text-slate-700 border-slate-200'
+                          ? 'bg-[#16205B] text-white border-[#16205B] shadow-xs'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      Male (পাত্র)
+                      Male
                     </button>
                     <button
                       type="button"
                       onClick={() => updateField('gender', 'Female')}
-                      className={`py-2 text-xs font-bold rounded-xl border transition-all ${
+                      className={`py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                         formData.gender === 'Female'
-                          ? 'bg-[#D91B2B] text-white border-[#D91B2B]'
-                          : 'bg-slate-50 text-slate-700 border-slate-200'
+                          ? 'bg-[#D91B2B] text-white border-[#D91B2B] shadow-xs'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      Female (পাত্রী)
+                      Female
                     </button>
                   </div>
                 </div>
@@ -688,46 +914,119 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
           {/* STEP 2: Personal & Professional */}
           {currentStep === 2 && (
             <div className="space-y-4 animate-in fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Educational Qualification *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.education}
-                    onChange={(e) => updateField('education', e.target.value)}
-                    placeholder="e.g. B.Sc. in Computer Science / MBBS / BBA"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
+              {/* Educational Qualification */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Educational Qualification *
+                </label>
+                <select
+                  value={
+                    isCustomEducation
+                      ? 'Other Qualification (Specify below)'
+                      : formData.education
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'Other Qualification (Specify below)') {
+                      setIsCustomEducation(true);
+                      updateField('education', '');
+                      updateField('highestDegree', 'Other Degree');
+                    } else {
+                      setIsCustomEducation(false);
+                      updateField('education', val);
+                      if (val.includes('Ph.D.') || val.includes('Doctorate') || val.includes('Post-Doctoral')) {
+                        updateField('highestDegree', 'Doctorate / Ph.D.');
+                      } else if (val.includes('MBBS') || val.includes('BDS') || val.includes('FCPS') || val.includes('MD')) {
+                        updateField('highestDegree', 'Medical Degree (MBBS / Specialist)');
+                      } else if (val.includes('M.Sc.') || val.includes('MBA') || val.includes('M.Com') || val.includes('LL.M') || val.includes('M.A.') || val.includes('Kamil') || val.includes('Foreign Master')) {
+                        updateField('highestDegree', 'Masters / Post Graduation');
+                      } else if (val.includes('B.Sc.') || val.includes('BBA') || val.includes('B.Com') || val.includes('LL.B') || val.includes('B.A.') || val.includes('Fazil') || val.includes('Foreign Bachelor')) {
+                        updateField('highestDegree', 'Graduation / Honours');
+                      } else if (val.includes('Bar-at-Law')) {
+                        updateField('highestDegree', 'Barrister-at-Law');
+                      } else if (val.includes('CA') || val.includes('ACCA') || val.includes('CMA') || val.includes('CFA')) {
+                        updateField('highestDegree', 'Chartered Professional Certification');
+                      } else if (val.includes('HSC') || val.includes('A Levels') || val.includes('Alim')) {
+                        updateField('highestDegree', 'Higher Secondary');
+                      } else if (val.includes('Diploma')) {
+                        updateField('highestDegree', 'Diploma');
+                      }
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                >
+                  <option value="">
+                    -- Select Educational Qualification --
+                  </option>
+                  {EDUCATION_QUALIFICATION_GROUPS.map((grp) => (
+                    <optgroup key={grp.group} label={grp.group}>
+                      {grp.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    University / College / Institution *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.institution}
-                    onChange={(e) => updateField('institution', e.target.value)}
-                    placeholder="e.g. BUET, Dhaka University, NSU, DMC, Abroad"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
+                {isCustomEducation && (
+                  <div className="mt-2 animate-in fade-in">
+                    <input
+                      type="text"
+                      value={formData.education}
+                      onChange={(e) => updateField('education', e.target.value)}
+                      placeholder="Type your degree or qualification (e.g. B.Tech, M.Ed)"
+                      className="w-full px-3.5 py-2 text-xs rounded-xl border border-rose-300 focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] bg-white"
+                      autoFocus
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Specify exact degree or diploma title
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Profession & Career */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Profession *
                   </label>
-                  <input
-                    type="text"
-                    value={formData.profession}
-                    onChange={(e) => updateField('profession', e.target.value)}
-                    placeholder="e.g. Software Engineer, Doctor, Banker"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
+                  <select
+                    value={
+                      isCustomProfession
+                        ? 'Other Profession (Specify below)'
+                        : formData.profession
+                    }
+                    onChange={(e) => handleProfessionChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                  >
+                    <option value="">
+                      -- Select Profession --
+                    </option>
+                    {PROFESSION_GROUPS.map((grp) => (
+                      <optgroup key={grp.group} label={grp.group}>
+                        {grp.options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+
+                  {isCustomProfession && (
+                    <div className="mt-2 animate-in fade-in">
+                      <input
+                        type="text"
+                        value={formData.profession}
+                        onChange={(e) => updateField('profession', e.target.value)}
+                        placeholder="Type your profession (e.g. Software Architect)"
+                        className="w-full px-3.5 py-2 text-xs rounded-xl border border-rose-300 focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] bg-white"
+                        autoFocus
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -737,19 +1036,22 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                   <select
                     value={formData.jobType}
                     onChange={(e) => updateField('jobType', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
                   >
+                    <option value="">-- Select Job Sector --</option>
                     <option value="Private">Private Company</option>
                     <option value="Multinational">Multinational (MNC)</option>
-                    <option value="Government">Government / BCS Cadre</option>
+                    <option value="Government">Government / Civil Service</option>
                     <option value="Doctor">Medical Doctor</option>
                     <option value="Engineer">Engineer</option>
                     <option value="Business">Business / Entrepreneur</option>
-                    <option value="Freelance">Freelance / Consultant</option>
+                    <option value="Freelance">Freelance / Remote</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Marital Status *
@@ -757,17 +1059,16 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                   <select
                     value={formData.maritalStatus}
                     onChange={(e) => updateField('maritalStatus', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
                   >
-                    <option value="Never Married">Never Married (অবিবাহিত)</option>
-                    <option value="Divorced">Divorced (ডিভোর্সড)</option>
-                    <option value="Widowed">Widowed (বিধবা/বিপত্মীক)</option>
-                    <option value="Separated">Separated (আলাদা)</option>
+                    <option value="">-- Select Marital Status --</option>
+                    <option value="Never Married">Never Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="Separated">Separated</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Candidate Height *
@@ -775,59 +1076,286 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                   <select
                     value={formData.height}
                     onChange={(e) => updateField('height', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
                   >
+                    <option value="">-- Select Height --</option>
+                    <option value={`4' 10" (147 cm)`}>4' 10" (147 cm)</option>
                     <option value={`5' 0" (152 cm)`}>5' 0" (152 cm)</option>
+                    <option value={`5' 1" (155 cm)`}>5' 1" (155 cm)</option>
                     <option value={`5' 2" (157 cm)`}>5' 2" (157 cm)</option>
+                    <option value={`5' 3" (160 cm)`}>5' 3" (160 cm)</option>
                     <option value={`5' 4" (163 cm)`}>5' 4" (163 cm)</option>
+                    <option value={`5' 5" (165 cm)`}>5' 5" (165 cm)</option>
                     <option value={`5' 6" (168 cm)`}>5' 6" (168 cm)</option>
+                    <option value={`5' 7" (170 cm)`}>5' 7" (170 cm)</option>
                     <option value={`5' 8" (173 cm)`}>5' 8" (173 cm)</option>
+                    <option value={`5' 9" (175 cm)`}>5' 9" (175 cm)</option>
                     <option value={`5' 10" (178 cm)`}>5' 10" (178 cm)</option>
+                    <option value={`5' 11" (180 cm)`}>5' 11" (180 cm)</option>
                     <option value={`6' 0" (183 cm)`}>6' 0" (183 cm)</option>
+                    <option value={`6' 1" (185 cm)`}>6' 1" (185 cm)</option>
                     <option value={`6' 2" (188 cm)`}>6' 2" (188 cm)</option>
+                    <option value={`6' 3" (190 cm)`}>6' 3" (190 cm)</option>
                   </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Present Country & City *
-                  </label>
-                  <input
-                    type="text"
-                    value={`${formData.presentCity}, ${formData.presentCountry}`}
-                    onChange={(e) => updateField('presentCity', e.target.value)}
-                    placeholder="e.g. Dhaka, Bangladesh or Toronto, Canada"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* PRESENT ADDRESS SECTION */}
+              <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-3.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-rose-50 text-[#D91B2B] flex items-center justify-center">
+                    <MapPin className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800">
+                      Present Address *
+                    </h4>
+                    <p className="text-[10px] text-slate-500">
+                      Where the candidate currently lives or works
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Present Country */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Country *
+                    </label>
+                    <select
+                      value={formData.presentCountry}
+                      onChange={(e) => handlePresentCountryChange(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                    >
+                      <option value="">-- Select Country --</option>
+                      <optgroup label="Popular Countries">
+                        {FEATURED_COUNTRIES.map((c) => (
+                          <option key={`pres-feat-${c}`} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="All Countries A-Z">
+                        {ALL_WORLD_COUNTRIES.map((c) => (
+                          <option key={`pres-all-${c}`} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  {/* Present City */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      City / District *
+                    </label>
+                    <select
+                      value={isCustomPresentCity ? 'Other City (Specify below)' : formData.presentCity}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'Other City (Specify below)') {
+                          setIsCustomPresentCity(true);
+                          updateField('presentCity', '');
+                        } else {
+                          setIsCustomPresentCity(false);
+                          updateField('presentCity', val);
+                          if (sameAsPresentAddress) {
+                            updateField('permanentDistrict', val);
+                          }
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                    >
+                      <option value="">
+                        {formData.presentCountry
+                          ? '-- Select City / District --'
+                          : '-- Select Country First --'}
+                      </option>
+                      {getCitiesForCountry(formData.presentCountry).map((city) => (
+                        <option key={`pres-city-${city}`} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                      <option value="Other City (Specify below)">
+                        + Other City (Specify below)
+                      </option>
+                    </select>
+
+                    {isCustomPresentCity && (
+                      <div className="mt-2 animate-in fade-in">
+                        <input
+                          type="text"
+                          value={formData.presentCity}
+                          onChange={(e) => {
+                            updateField('presentCity', e.target.value);
+                            if (sameAsPresentAddress) {
+                              updateField('permanentDistrict', e.target.value);
+                            }
+                          }}
+                          placeholder="Type city or town name"
+                          className="w-full px-3 py-1.5 text-xs rounded-xl border border-rose-300 focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] bg-white"
+                          autoFocus
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Additional manual text option */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Present Address *
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Street Address / Area (Optional)
                   </label>
                   <input
                     type="text"
                     value={formData.presentAddress}
-                    onChange={(e) => updateField('presentAddress', e.target.value)}
-                    placeholder="e.g. House 14, Road 5, Dhanmondi, Dhaka"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
+                    onChange={(e) => {
+                      updateField('presentAddress', e.target.value);
+                      if (sameAsPresentAddress) {
+                        updateField('permanentAddress', e.target.value);
+                      }
+                    }}
+                    placeholder="e.g. House #14, Road #5, Dhanmondi, Dhaka"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
                   />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Short street or area details for communication.
+                  </span>
+                </div>
+              </div>
+
+              {/* PERMANENT ADDRESS SECTION */}
+              <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-blue-50 text-[#16205B] flex items-center justify-center">
+                      <Home className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800">
+                        Permanent Address *
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        Hometown or ancestral family origin
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Same as present address checkbox */}
+                  <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer select-none bg-white px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 shadow-xs transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={sameAsPresentAddress}
+                      onChange={(e) => handleToggleSameAddress(e.target.checked)}
+                      className="rounded text-[#16205B] focus:ring-[#16205B] w-3.5 h-3.5 cursor-pointer"
+                    />
+                    <span className="text-[11px] font-medium">Same as Present Address</span>
+                  </label>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Permanent District / Ancestral Origin *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.permanentDistrict}
-                    onChange={(e) => updateField('permanentDistrict', e.target.value)}
-                    placeholder="e.g. Dhaka / Chattogram / Sylhet / Cumilla"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
+                {!sameAsPresentAddress ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {/* Permanent Country */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Country *
+                        </label>
+                        <select
+                          value={formData.permanentCountry}
+                          onChange={(e) => handlePermanentCountryChange(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                        >
+                          <option value="">-- Select Country --</option>
+                          <optgroup label="Popular Countries">
+                            {FEATURED_COUNTRIES.map((c) => (
+                              <option key={`perm-feat-${c}`} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="All Countries A-Z">
+                            {ALL_WORLD_COUNTRIES.map((c) => (
+                              <option key={`perm-all-${c}`} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </optgroup>
+                        </select>
+                      </div>
+
+                      {/* Permanent City / District */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          City / District *
+                        </label>
+                        <select
+                          value={isCustomPermanentCity ? 'Other City (Specify below)' : formData.permanentDistrict}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === 'Other City (Specify below)') {
+                              setIsCustomPermanentCity(true);
+                              updateField('permanentDistrict', '');
+                            } else {
+                              setIsCustomPermanentCity(false);
+                              updateField('permanentDistrict', val);
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white cursor-pointer"
+                        >
+                          <option value="">
+                            {formData.permanentCountry
+                              ? '-- Select City / District --'
+                              : '-- Select Country First --'}
+                          </option>
+                          {getCitiesForCountry(formData.permanentCountry).map((city) => (
+                            <option key={`perm-city-${city}`} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                          <option value="Other City (Specify below)">
+                            + Other City (Specify below)
+                          </option>
+                        </select>
+
+                        {isCustomPermanentCity && (
+                          <div className="mt-2 animate-in fade-in">
+                            <input
+                              type="text"
+                              value={formData.permanentDistrict}
+                              onChange={(e) => updateField('permanentDistrict', e.target.value)}
+                              placeholder="Type permanent city/district name"
+                              className="w-full px-3 py-1.5 text-xs rounded-xl border border-rose-300 focus:ring-2 focus:ring-[#D91B2B]/20 focus:border-[#D91B2B] bg-white"
+                              autoFocus
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Additional manual text option for permanent */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Detailed Permanent Address / Village (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.permanentAddress}
+                        onChange={(e) => updateField('permanentAddress', e.target.value)}
+                        placeholder="e.g. Village, Post Office, Upazila / District"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200/80 text-xs text-emerald-800 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Permanent address is saved same as present address ({formData.presentCity}, {formData.presentCountry}).
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -835,6 +1363,7 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
           {/* STEP 3: Family Background */}
           {currentStep === 3 && (
             <div className="space-y-4 animate-in fade-in">
+              {/* Father's Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -858,13 +1387,14 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                     type="text"
                     value={formData.fatherProfession}
                     onChange={(e) => updateField('fatherProfession', e.target.value)}
-                    placeholder="e.g. Govt Director (Retd) / Businessman / Professor"
+                    placeholder="e.g. Retired Govt Director / Businessman / Professor"
                     required
                     className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
                   />
                 </div>
               </div>
 
+              {/* Mother's Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -895,206 +1425,264 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Brothers Details (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.brotherDetails}
-                    onChange={(e) => updateField('brotherDetails', e.target.value)}
-                    placeholder="e.g. 1 Elder Brother (B.Sc. Engineer, settled abroad)"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
+              {/* Add Family Member Section */}
+              <div className="pt-3 border-t border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                      <Users className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        Family Members & Siblings
+                        <span className="text-[10px] font-normal text-slate-400">
+                          (Optional)
+                        </span>
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        Add brothers, sisters, or other relatives with their profession
+                      </p>
+                    </div>
+                  </div>
+                  {formData.familyMembers && formData.familyMembers.length > 0 && (
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      {formData.familyMembers.length} {formData.familyMembers.length === 1 ? 'member' : 'members'}
+                    </span>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Sisters Details (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sisterDetails}
-                    onChange={(e) => updateField('sisterDetails', e.target.value)}
-                    placeholder="e.g. 1 Younger Sister (Doctor at DMC)"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B]"
-                  />
-                </div>
-              </div>
+                {/* Family Members Dynamic List */}
+                {formData.familyMembers && formData.familyMembers.length > 0 ? (
+                  <div className="space-y-3">
+                    {formData.familyMembers.map((member, idx) => (
+                      <div
+                        key={member.id || idx}
+                        className="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/90 relative group hover:border-slate-300 transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-2.5">
+                          <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-full bg-[#16205B] text-white flex items-center justify-center text-[10px] font-bold">
+                              {idx + 1}
+                            </span>
+                            Family Member #{idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeFamilyMember(idx)}
+                            className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                            title="Remove this member"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span className="text-[10px]">Remove</span>
+                          </button>
+                        </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Family Values
-                  </label>
-                  <select
-                    value={formData.familyValues}
-                    onChange={(e) => updateField('familyValues', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
-                  >
-                    <option value="Moderate">Moderate (আধুনিক ও ধার্মিক সমন্বয়)</option>
-                    <option value="Traditional">Traditional (ঐতিহ্যবাহী)</option>
-                    <option value="Religious">Religious (ধার্মিক ও পর্দাশীল)</option>
-                    <option value="Liberal">Liberal (প্রগতিশীল)</option>
-                  </select>
-                </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {/* 1. Name */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Name
+                            </label>
+                            <input
+                              type="text"
+                              value={member.name}
+                              onChange={(e) => updateFamilyMember(idx, 'name', e.target.value)}
+                              placeholder="e.g. Tanvir Rahman"
+                              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Family Economic Class
-                  </label>
-                  <select
-                    value={formData.economicStatus}
-                    onChange={(e) => updateField('economicStatus', e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
-                  >
-                    <option value="Upper Middle Class">Upper Middle Class (উচ্চ মধ্যবিত্ত)</option>
-                    <option value="Middle Class">Middle Class (মধ্যবিত্ত)</option>
-                    <option value="Affluent">Affluent (ধনী ও প্রতিষ্ঠিত)</option>
-                    <option value="High Net Worth">Aristocratic / Elite</option>
-                  </select>
-                </div>
+                          {/* 2. Relationship */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Relationship
+                            </label>
+                            <input
+                              type="text"
+                              list="family-relationship-options"
+                              value={member.relationship}
+                              onChange={(e) => updateFamilyMember(idx, 'relationship', e.target.value)}
+                              placeholder="e.g. Elder Brother, Sister, Uncle"
+                              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                            />
+                          </div>
+
+                          {/* 3. Profession */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Profession
+                            </label>
+                            <input
+                              type="text"
+                              value={member.profession}
+                              onChange={(e) => updateFamilyMember(idx, 'profession', e.target.value)}
+                              placeholder="e.g. Software Engineer, Doctor, Student"
+                              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center">
+                    <p className="text-[11px] text-slate-500">
+                      No additional family members added yet. You can add brothers, sisters, or relatives below if needed.
+                    </p>
+                  </div>
+                )}
+
+                {/* Suggestions Datalist */}
+                <datalist id="family-relationship-options">
+                  <option value="Elder Brother" />
+                  <option value="Younger Brother" />
+                  <option value="Brother" />
+                  <option value="Elder Sister" />
+                  <option value="Younger Sister" />
+                  <option value="Sister" />
+                  <option value="Paternal Uncle" />
+                  <option value="Maternal Uncle" />
+                  <option value="Paternal Aunt" />
+                  <option value="Maternal Aunt" />
+                  <option value="Grandfather" />
+                  <option value="Grandmother" />
+                  <option value="Cousin" />
+                </datalist>
+
+                {/* Add Member Button */}
+                <button
+                  type="button"
+                  onClick={addFamilyMember}
+                  className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-[#16205B]/30 hover:border-[#16205B] hover:bg-[#16205B]/5 text-[#16205B] font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add Family Member</span>
+                </button>
               </div>
             </div>
           )}
 
           {/* STEP 4: Partner Preference & Photos */}
           {currentStep === 4 && (
-            <div className="space-y-4 animate-in fade-in">
-              {/* Photo Upload & Preview */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-5">
-                <div className="relative group shrink-0">
-                  <img
-                    src={formData.avatar}
-                    alt="Profile Preview"
-                    className="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow-md group-hover:opacity-90"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera className="w-5 h-5 text-white" />
-                  </div>
-                </div>
+            <div className="space-y-5 animate-in fade-in">
+              {/* Hidden manual file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
 
-                <div className="flex-1 text-center sm:text-left space-y-1.5">
-                  <h4 className="text-xs font-bold text-slate-900">
-                    Candidate Profile Photo
-                  </h4>
-                  <p className="text-[11px] text-slate-500">
-                    High quality, front-facing dignified photograph. JPG, PNG or WEBP.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateField(
-                          'avatar',
-                          formData.gender === 'Male'
-                            ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop'
-                            : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&h=500&fit=crop'
-                        )
-                      }
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs"
-                    >
-                      Use Demo Photo A
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateField(
-                          'avatar',
-                          formData.gender === 'Male'
-                            ? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop'
-                            : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&h=500&fit=crop'
-                        )
-                      }
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs"
-                    >
-                      Use Demo Photo B
-                    </button>
-                  </div>
-                </div>
+              {/* Photo Upload & Preview - Manually uploaded only, no demo photo buttons */}
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-2">
+                  Candidate Photograph *
+                </label>
 
-                {/* Privacy Setting */}
-                <div className="shrink-0 w-full sm:w-auto">
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Photo Privacy
-                  </label>
-                  <select
-                    value={formData.photoPrivacy}
-                    onChange={(e) => updateField('photoPrivacy', e.target.value)}
-                    className="w-full sm:w-36 px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 bg-white"
+                {formData.avatar ? (
+                  <div className="bg-slate-50/90 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-5">
+                    <div className="relative shrink-0">
+                      <img
+                        src={formData.avatar}
+                        alt="Uploaded Candidate Photo"
+                        className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 border-white shadow-md ring-2 ring-emerald-500/20"
+                      />
+                      <div className="absolute -bottom-2 -right-2 bg-emerald-600 text-white rounded-full p-1 shadow-sm">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 text-center sm:text-left space-y-2">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Photograph Uploaded</span>
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                        Candidate Profile Photograph
+                      </h4>
+                      <p className="text-[11px] text-slate-500 max-w-md">
+                        Your photograph has been uploaded successfully. You can change or replace it anytime before submission.
+                      </p>
+                      <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs cursor-pointer"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Change Photo</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateField('avatar', '')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-[#D91B2B] transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={handleDragOverPhoto}
+                    onDragLeave={handleDragLeavePhoto}
+                    onDrop={handleDropPhoto}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`p-6 sm:p-8 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center flex flex-col items-center justify-center gap-3 ${
+                      isDraggingPhoto
+                        ? 'border-[#16205B] bg-indigo-50/70 scale-[0.99]'
+                        : 'border-slate-300 bg-slate-50/80 hover:bg-slate-100/80 hover:border-[#16205B]/50'
+                    }`}
                   >
-                    <option value="Public">Public to All</option>
-                    <option value="Protected">Verified Only</option>
-                    <option value="On-Request">On Request Only</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Partner Preference Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Preferred Age Range
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={formData.partnerMinAge}
-                      onChange={(e) => updateField('partnerMinAge', Number(e.target.value))}
-                      className="w-20 px-3 py-2 text-xs rounded-xl border border-slate-200 text-center"
-                    />
-                    <span className="text-xs text-slate-400">to</span>
-                    <input
-                      type="number"
-                      value={formData.partnerMaxAge}
-                      onChange={(e) => updateField('partnerMaxAge', Number(e.target.value))}
-                      className="w-20 px-3 py-2 text-xs rounded-xl border border-slate-200 text-center"
-                    />
-                    <span className="text-xs text-slate-500">years</span>
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200 flex items-center justify-center text-[#16205B]">
+                      <UploadCloud className="w-7 h-7 stroke-[1.75]" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                        Upload Candidate Photograph *
+                      </h4>
+                      <p className="text-[11px] sm:text-xs text-slate-500">
+                        Drag and drop an image file here, or click to browse from your device
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        Supports JPG, PNG, WEBP (Max 5MB) • Only manual upload allowed
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16205B] text-white text-xs font-semibold hover:bg-[#0f1744] shadow-xs transition-colors cursor-pointer"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Browse Photo from Device</span>
+                    </button>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Preferred Minimum Height
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.partnerMinHeight}
-                    onChange={(e) => updateField('partnerMinHeight', e.target.value)}
-                    placeholder="e.g. 5' 2&quot; or 5' 7&quot;"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Preferred Education & Profession
+              {/* Partner Preference Manual Text Area */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800">
+                    Partner Expectations & Preferences
                   </label>
-                  <input
-                    type="text"
-                    value={formData.partnerProfession}
-                    onChange={(e) => updateField('partnerProfession', e.target.value)}
-                    placeholder="e.g. Doctor, Engineer, BCS, Banker, MNC"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
+                  <span className="text-[11px] text-slate-400">Manual text description</span>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Preferred Location / Expat Country
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.partnerLocation}
-                    onChange={(e) => updateField('partnerLocation', e.target.value)}
-                    placeholder="e.g. Dhaka, Canada, USA, UK, or Open"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
+                <p className="text-[11px] text-slate-500">
+                  Describe what kind of partner you or candidate are looking for (education, family values, profession, religious outlook, lifestyle).
+                </p>
+                <textarea
+                  value={formData.partnerNotes}
+                  onChange={(e) => updateField('partnerNotes', e.target.value)}
+                  rows={5}
+                  placeholder="Describe your partner expectations here (e.g., preferred education, profession, family background, religious outlook, location, lifestyle)..."
+                  className="w-full px-3.5 py-3 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#16205B]/20 focus:border-[#16205B] bg-white text-slate-800 resize-y leading-relaxed shadow-xs"
+                />
               </div>
 
               {/* Review Check */}

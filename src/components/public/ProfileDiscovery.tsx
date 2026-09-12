@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MatrimonialProfile } from '../../types';
+import { MatrimonialProfile, SiteSettings } from '../../types';
 import {
   Search,
   Filter,
@@ -28,6 +28,7 @@ interface ProfileDiscoveryProps {
   initialCountryFilter?: string;
   isHomePage?: boolean;
   onViewMore?: () => void;
+  siteSettings?: SiteSettings;
 }
 
 export const ProfileDiscovery: React.FC<ProfileDiscoveryProps> = ({
@@ -41,6 +42,7 @@ export const ProfileDiscovery: React.FC<ProfileDiscoveryProps> = ({
   initialCountryFilter,
   isHomePage = false,
   onViewMore,
+  siteSettings,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [genderFilter, setGenderFilter] = useState<string>(initialGenderFilter || 'All');
@@ -117,11 +119,11 @@ export const ProfileDiscovery: React.FC<ProfileDiscoveryProps> = ({
         <div className={`flex items-center justify-between ${isHomePage ? 'mb-2 sm:mb-3.5' : 'mb-6 sm:mb-8'} gap-2`}>
           <div>
             <h2 className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-white font-display tracking-tight leading-tight">
-              {isHomePage ? 'Featured Profiles' : 'Discover Dignified Matches'}
+              {isHomePage ? (siteSettings?.featuredSectionTitle || 'Featured Profiles') : 'Discover Dignified Matches'}
             </h2>
             <p className={`text-xs sm:text-sm text-slate-300 mt-0.5 max-w-xl ${isHomePage ? 'hidden sm:block' : ''}`}>
               {isHomePage
-                ? 'Handpicked and verified biodatas ready for meaningful matrimonial connections.'
+                ? (siteSettings?.featuredSectionSubtitle || 'Handpicked and verified biodatas ready for meaningful matrimonial connections.')
                 : 'Browse thoroughly vetted candidate biodatas across Bangladesh and the global diaspora.'}
             </p>
           </div>

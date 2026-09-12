@@ -1,13 +1,15 @@
 import React from 'react';
 import { BrandLogo } from './BrandLogo';
 import { ShieldCheck, PhoneCall, Mail, MapPin, Heart, Lock, CheckCircle2, Globe2 } from 'lucide-react';
+import { SiteSettings } from '../../types';
 
 interface FooterProps {
   onNavigate: (tab: string) => void;
   onOpenRegister: () => void;
+  siteSettings?: SiteSettings;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRegister }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRegister, siteSettings }) => {
   return (
     <footer className="bg-[#0F1538] text-slate-300 pt-16 pb-12 border-t border-[#1C2556]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,15 +68,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRegister }) =>
             <div className="pt-2 space-y-2 text-xs text-slate-400">
               <p className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#D91B2B]" />
-                Level 7, Concord Tower, Gulshan-2, Dhaka-1212, Bangladesh
+                {siteSettings?.officeAddress || 'Level 7, Concord Tower, Gulshan-2, Dhaka-1212, Bangladesh'}
               </p>
               <p className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-[#D91B2B]" />
-                VIP Helpline: +880 1711-009988 | +880 9612-445566
+                VIP Helpline: {siteSettings?.helplinePhone1 || '+880 1711-009988'} {siteSettings?.helplinePhone2 ? `| ${siteSettings.helplinePhone2}` : ''}
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#D91B2B]" />
-                matchmaking@shadikabbo.com | support@shadikabbo.com
+                {siteSettings?.supportEmail || 'support@shadikabbo.com'}
               </p>
             </div>
           </div>

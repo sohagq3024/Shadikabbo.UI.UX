@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MatrimonialProfile } from '../../types';
+import { MatrimonialProfile, UserAccount } from '../../types';
 import {
   X,
   Heart,
@@ -16,8 +16,11 @@ import {
   Sparkles,
   Calendar,
   Share2,
+  AlertCircle,
+  Crown,
 } from 'lucide-react';
 import { useToast } from '../common/Toast';
+import { ShadikabboAuthorityDeskCard } from '../common/ShadikabboAuthorityDeskCard';
 
 interface ProfileDetailModalProps {
   profile: MatrimonialProfile | null;
@@ -28,6 +31,8 @@ interface ProfileDetailModalProps {
   isShortlisted: boolean;
   isLoggedIn: boolean;
   hasProposalSent: boolean;
+  currentUser?: UserAccount | null;
+  onOpenUpgrade?: () => void;
 }
 
 export const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
@@ -39,11 +44,16 @@ export const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
   isShortlisted,
   isLoggedIn,
   hasProposalSent,
+  currentUser,
+  onOpenUpgrade,
 }) => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'overview' | 'career' | 'family' | 'preference' | 'contact'>('overview');
 
   if (!isOpen || !profile) return null;
+
+  // Determine if viewer is on a free plan
+  const isFreeUser = !currentUser || currentUser.membershipPlan === 'free';
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href);
@@ -170,261 +180,348 @@ export const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-slate-200 overflow-x-auto gap-1">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'career', label: 'Education & Career' },
-              { id: 'family', label: 'Family Heritage' },
-              { id: 'preference', label: 'Partner Preferences' },
-              { id: 'contact', label: 'Contact Info' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors border-b-2 ${
-                  activeTab === tab.id
-                    ? 'border-[#D91B2B] text-[#D91B2B]'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab 1: Overview */}
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-                  Personal Attributes
-                </h4>
-                <div className="space-y-2 text-slate-600">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Marital Status:</span>
-                    <span className="font-semibold text-slate-800">{profile.maritalStatus}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Religion / Faith:</span>
-                    <span className="font-semibold text-slate-800">{profile.religion}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Date of Birth:</span>
-                    <span className="font-semibold text-slate-800">{profile.dateOfBirth} ({profile.age} yrs)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Height / Weight:</span>
-                    <span className="font-semibold text-slate-800">{profile.height} • {profile.weight || 'Proportional'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Citizenship:</span>
-                    <span className="font-semibold text-slate-800">{profile.citizenshipStatus || 'Bangladeshi'}</span>
-                  </div>
+          {/* If free user, hide all sensitive facilities and show Authority Desk */}
+          {isFreeUser ? (
+            <div className="space-y-6 pt-1">
+              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-rose-50 via-amber-50/60 to-rose-50 border border-rose-200/80 space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#D91B2B] text-white shadow-2xs">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>ফ্রি একাউন্ট সীমাবদ্ধতা (Free Account Notice)</span>
                 </div>
+                <h4 className="text-base sm:text-lg font-black text-slate-900 font-display">
+                  বায়োডাটার বিস্তারিত সুবিধাসমূহ (Facilities) দেখতে পাচ্ছেন না?
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  সম্মানিত ব্যবহারকারী, সম্মানিত পরিবার ও প্রার্থীদের গোপনীয়তা ও নিরাপত্তা নিশ্চিতকরণে 
+                  <strong> ফ্রি একাউন্টের জন্য বায়োডাটার বিস্তারিত সুবিধাসমূহ সাময়িকভাবে সংরক্ষিত</strong> রাখা হয়েছে।
+                </p>
+                <div className="p-3.5 rounded-2xl bg-white/80 border border-rose-100 text-xs text-slate-700 leading-relaxed space-y-1">
+                  <p className="font-bold text-[#16205B]">
+                    📌 প্রোফাইল কেন দেখতে পাচ্ছেন না তা জানতে এবং বায়োডাটা অ্যাক্টিভ করতে:
+                  </p>
+                  <p>
+                    অনুগ্রহ করে সরাসরি <strong>শাদী কাব্য কর্তৃপক্ষের (Authority)</strong> সাথে নিচের হেল্পলাইনে কল করে অথবা লাইভ চ্যাট বোর্ডে যোগাযোগ করুন।
+                  </p>
+                </div>
+                {onOpenUpgrade && (
+                  <div className="pt-1">
+                    <button
+                      onClick={onOpenUpgrade}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#16205B] to-[#D91B2B] text-white text-xs font-bold shadow-xs hover:opacity-95 transition-all cursor-pointer"
+                    >
+                      <Crown className="w-3.5 h-3.5 text-amber-300" />
+                      <span>মেম্বারশিপ প্যাকেজ আপগ্রেড করুন</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-                  Location & Residence
-                </h4>
-                <div className="space-y-2 text-slate-600">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Present Country:</span>
-                    <span className="font-semibold text-slate-800">{profile.presentCountry}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Present City:</span>
-                    <span className="font-semibold text-slate-800">{profile.presentCity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Permanent District:</span>
-                    <span className="font-semibold text-slate-800">{profile.permanentDistrict}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Biodata Created By:</span>
-                    <span className="font-semibold text-slate-800">{profile.createdFor}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Last Active:</span>
-                    <span className="font-semibold text-emerald-700">{profile.lastActive}</span>
-                  </div>
-                </div>
+              {/* User's Selected Option Card */}
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider px-1">
+                  কর্তৃপক্ষের সাথে যোগাযোগের মাধ্যম (Contact Authority):
+                </p>
+                <ShadikabboAuthorityDeskCard
+                  userName={currentUser?.name || 'Member'}
+                  helplineNumber="+8801711009988"
+                  helplineDisplay="+880 1711-009988"
+                />
               </div>
             </div>
-          )}
-
-          {/* Tab 2: Career */}
-          {activeTab === 'career' && (
-            <div className="space-y-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-[#16205B]" />
-                  Educational Credentials
-                </h4>
-                <div className="space-y-2 text-slate-600">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Highest Qualification:</span>
-                    <span className="font-bold text-slate-900">{profile.education}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Academic Institution:</span>
-                    <span className="font-semibold text-slate-800">{profile.institution}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Degree Level:</span>
-                    <span className="font-semibold text-slate-800">{profile.highestDegree}</span>
-                  </div>
-                </div>
+          ) : (
+            <>
+              {/* Navigation Tabs */}
+              <div className="flex border-b border-slate-200 overflow-x-auto gap-1">
+                {[
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'career', label: 'Education & Career' },
+                  { id: 'family', label: 'Family Heritage' },
+                  { id: 'preference', label: 'Partner Preferences' },
+                  { id: 'contact', label: 'Contact Info' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors border-b-2 ${
+                      activeTab === tab.id
+                        ? 'border-[#D91B2B] text-[#D91B2B]'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4 text-[#D91B2B]" />
-                  Professional Background
-                </h4>
-                <div className="space-y-2 text-slate-600">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Profession:</span>
-                    <span className="font-bold text-slate-900">{profile.profession}</span>
+              {/* Tab 1: Overview */}
+              {activeTab === 'overview' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                      Personal Attributes
+                    </h4>
+                    <div className="space-y-2 text-slate-600">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Marital Status:</span>
+                        <span className="font-semibold text-slate-800">{profile.maritalStatus}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Religion / Faith:</span>
+                        <span className="font-semibold text-slate-800">{profile.religion}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Date of Birth:</span>
+                        <span className="font-semibold text-slate-800">{profile.dateOfBirth} ({profile.age} yrs)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Height / Weight:</span>
+                        <span className="font-semibold text-slate-800">{profile.height} • {profile.weight || 'Proportional'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Citizenship:</span>
+                        <span className="font-semibold text-slate-800">{profile.citizenshipStatus || 'Bangladeshi'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Designation / Role:</span>
-                    <span className="font-semibold text-slate-800">{profile.jobTitle}</span>
+
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                      Location & Residence
+                    </h4>
+                    <div className="space-y-2 text-slate-600">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Present Country:</span>
+                        <span className="font-semibold text-slate-800">{profile.presentCountry}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Present City:</span>
+                        <span className="font-semibold text-slate-800">{profile.presentCity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Permanent District:</span>
+                        <span className="font-semibold text-slate-800">{profile.permanentDistrict}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Biodata Created By:</span>
+                        <span className="font-semibold text-slate-800">{profile.createdFor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Last Active:</span>
+                        <span className="font-semibold text-emerald-700">{profile.lastActive}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Sector / Employer:</span>
-                    <span className="font-semibold text-slate-800">{profile.companyOrSector} ({profile.jobType})</span>
+                </div>
+              )}
+
+              {/* Tab 2: Career */}
+              {activeTab === 'career' && (
+                <div className="space-y-4 text-xs">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <GraduationCap className="w-4 h-4 text-[#16205B]" />
+                      Educational Credentials
+                    </h4>
+                    <div className="space-y-2 text-slate-600">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Highest Qualification:</span>
+                        <span className="font-bold text-slate-900">{profile.education}</span>
+                      </div>
+                      {profile.institution && profile.institution !== 'N/A' && profile.institution.trim() !== '' && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Academic Institution:</span>
+                          <span className="font-semibold text-slate-800">{profile.institution}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Degree Level:</span>
+                        <span className="font-semibold text-slate-800">{profile.highestDegree}</span>
+                      </div>
+                    </div>
                   </div>
-                  {profile.monthlyIncome && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Monthly Compensation:</span>
-                      <span className="font-bold text-emerald-700">{profile.monthlyIncome}</span>
+
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <Briefcase className="w-4 h-4 text-[#D91B2B]" />
+                      Professional Background
+                    </h4>
+                    <div className="space-y-2 text-slate-600">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Profession:</span>
+                        <span className="font-bold text-slate-900">{profile.profession}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Designation / Role:</span>
+                        <span className="font-semibold text-slate-800">{profile.jobTitle}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Sector / Employer:</span>
+                        <span className="font-semibold text-slate-800">{profile.companyOrSector} ({profile.jobType})</span>
+                      </div>
+                      {profile.monthlyIncome && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Monthly Compensation:</span>
+                          <span className="font-bold text-emerald-700">{profile.monthlyIncome}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Family */}
+              {activeTab === 'family' && (
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4 text-xs">
+                  <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                    Family Information & Heritage
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Father's Name & Profession:</span>
+                        <p className="font-bold text-slate-900">{profile.fatherName}</p>
+                        <p className="text-slate-600">{profile.fatherProfession}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Mother's Name & Profession:</span>
+                        <p className="font-bold text-slate-900">{profile.motherName}</p>
+                        <p className="text-slate-600">{profile.motherProfession}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {(profile.brotherCount !== undefined || profile.brotherDetails || profile.sisterDetails) && (
+                        <div>
+                          <span className="text-slate-400 block text-[11px]">Siblings Details:</span>
+                          {(profile.brotherCount !== undefined || profile.sisterCount !== undefined) && (
+                            <p className="font-semibold text-slate-800">
+                              {profile.brotherCount || 0} Brother(s) • {profile.sisterCount || 0} Sister(s)
+                            </p>
+                          )}
+                          {profile.brotherDetails && (
+                            <p className="text-slate-600 text-[11px]">{profile.brotherDetails}</p>
+                          )}
+                          {profile.sisterDetails && (
+                            <p className="text-slate-600 text-[11px]">{profile.sisterDetails}</p>
+                          )}
+                        </div>
+                      )}
+                      {(profile.familyValues || profile.economicStatus) && (
+                        <div>
+                          <span className="text-slate-400 block text-[11px]">Family Social & Economic Class:</span>
+                          <p className="font-semibold text-slate-800">
+                            {profile.familyValues || 'Respected'} Values • {profile.economicStatus || 'Middle Class'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Family Members list if present */}
+                  {profile.familyMembers && profile.familyMembers.length > 0 && (
+                    <div className="pt-3 border-t border-slate-200/60 space-y-2">
+                      <span className="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">
+                        Other Family Members:
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {profile.familyMembers.map((fm, idx) => (
+                          <div
+                            key={fm.id || idx}
+                            className="p-2.5 rounded-xl bg-white border border-slate-200/80 flex items-start justify-between text-xs"
+                          >
+                            <div>
+                              <p className="font-bold text-slate-800">{fm.name || 'Member'}</p>
+                              <p className="text-[11px] text-slate-500">{fm.relationship}</p>
+                            </div>
+                            {fm.profession && (
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium shrink-0 ml-2">
+                                {fm.profession}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.familyNotes && (
+                    <div className="pt-2 border-t border-slate-200/60">
+                      <span className="text-slate-400 block text-[11px] mb-0.5">Family Heritage Note:</span>
+                      <p className="text-slate-700 italic">{profile.familyNotes}</p>
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Tab 3: Family */}
-          {activeTab === 'family' && (
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4 text-xs">
-              <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-                Family Information & Heritage
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Father's Name & Profession:</span>
-                    <p className="font-bold text-slate-900">{profile.fatherName}</p>
-                    <p className="text-slate-600">{profile.fatherProfession}</p>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Mother's Name & Profession:</span>
-                    <p className="font-bold text-slate-900">{profile.motherName}</p>
-                    <p className="text-slate-600">{profile.motherProfession}</p>
-                  </div>
-                </div>
+              {/* Tab 4: Preferences */}
+              {activeTab === 'preference' && (
+                <div className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200/80 space-y-4 text-xs">
+                  <h4 className="font-bold text-[#16205B] uppercase tracking-wider text-[11px]">
+                    Desired Partner Expectations
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2 text-slate-700">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Expected Age:</span>
+                        <span className="font-bold">{profile.partnerMinAge} - {profile.partnerMaxAge} Years</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Minimum Height:</span>
+                        <span className="font-bold">{profile.partnerMinHeight}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Marital Status:</span>
+                        <span className="font-bold">{profile.partnerMaritalStatus.join(', ')}</span>
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Siblings Details:</span>
-                    <p className="font-semibold text-slate-800">
-                      {profile.brotherCount} Brother(s) • {profile.sisterCount} Sister(s)
-                    </p>
-                    {profile.brotherDetails && (
-                      <p className="text-slate-600 text-[11px]">{profile.brotherDetails}</p>
-                    )}
-                    {profile.sisterDetails && (
-                      <p className="text-slate-600 text-[11px]">{profile.sisterDetails}</p>
-                    )}
+                    <div className="space-y-2 text-slate-700">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">Preferred Education & Profession:</span>
+                        <p className="font-bold">{profile.partnerProfession.join(', ')}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">Preferred Locations:</span>
+                        <p className="font-bold">{profile.partnerLocation.join(' • ')}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Family Social & Economic Class:</span>
-                    <p className="font-semibold text-slate-800">
-                      {profile.familyValues} Values • {profile.economicStatus}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {profile.familyNotes && (
-                <div className="pt-2 border-t border-slate-200/60">
-                  <span className="text-slate-400 block text-[11px] mb-0.5">Family Heritage Note:</span>
-                  <p className="text-slate-700 italic">{profile.familyNotes}</p>
+                  {profile.partnerOtherPreferences && (
+                    <div className="pt-3 border-t border-rose-200/60">
+                      <span className="text-slate-500 block text-[11px] mb-1">Additional Expectations:</span>
+                      <p className="text-slate-800 leading-relaxed">{profile.partnerOtherPreferences}</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Tab 4: Preferences */}
-          {activeTab === 'preference' && (
-            <div className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200/80 space-y-4 text-xs">
-              <h4 className="font-bold text-[#16205B] uppercase tracking-wider text-[11px]">
-                Desired Partner Expectations
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2 text-slate-700">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Expected Age:</span>
-                    <span className="font-bold">{profile.partnerMinAge} - {profile.partnerMaxAge} Years</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Minimum Height:</span>
-                    <span className="font-bold">{profile.partnerMinHeight}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Marital Status:</span>
-                    <span className="font-bold">{profile.partnerMaritalStatus.join(', ')}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-slate-700">
-                  <div>
-                    <span className="text-slate-500 block text-[11px]">Preferred Education & Profession:</span>
-                    <p className="font-bold">{profile.partnerProfession.join(', ')}</p>
+              {/* Tab 5: Contact Info */}
+              {activeTab === 'contact' && (
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-4 text-xs">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                    <Lock className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Preferred Locations:</span>
-                    <p className="font-bold">{profile.partnerLocation.join(' • ')}</p>
+                    <h4 className="text-sm font-bold text-slate-900">
+                      Guardian Contact & WhatsApp Information Protected
+                    </h4>
+                    <p className="text-slate-500 max-w-md mx-auto mt-1 text-xs">
+                      To safeguard the dignity of both candidates and families, verified contact numbers are automatically unlocked once a mutual marriage proposal is accepted.
+                    </p>
                   </div>
-                </div>
-              </div>
 
-              {profile.partnerOtherPreferences && (
-                <div className="pt-3 border-t border-rose-200/60">
-                  <span className="text-slate-500 block text-[11px] mb-1">Additional Expectations:</span>
-                  <p className="text-slate-800 leading-relaxed">{profile.partnerOtherPreferences}</p>
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                      onClick={() => onSendProposal(profile)}
+                      className="px-5 py-2.5 bg-[#D91B2B] text-white font-bold rounded-xl shadow-sm text-xs hover:bg-[#b91422]"
+                    >
+                      Send Proposal to Request Contact
+                    </button>
+                  </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Tab 5: Contact Info */}
-          {activeTab === 'contact' && (
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-4 text-xs">
-              <div className="w-12 h-12 mx-auto rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                <Lock className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900">
-                  Guardian Contact & WhatsApp Information Protected
-                </h4>
-                <p className="text-slate-500 max-w-md mx-auto mt-1 text-xs">
-                  To safeguard the dignity of both candidates and families, verified contact numbers are automatically unlocked once a mutual marriage proposal is accepted.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center gap-3 pt-2">
-                <button
-                  onClick={() => onSendProposal(profile)}
-                  className="px-5 py-2.5 bg-[#D91B2B] text-white font-bold rounded-xl shadow-sm text-xs hover:bg-[#b91422]"
-                >
-                  Send Proposal to Request Contact
-                </button>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>

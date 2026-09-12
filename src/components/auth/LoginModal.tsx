@@ -65,8 +65,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       const normalizedEmail = email.toLowerCase().trim();
       let matchedAccount: UserAccount;
 
-      if (normalizedEmail === 'superadmin096@gmail.com' || normalizedEmail.includes('superadmin')) {
+      if (
+        normalizedEmail === 'superadmin096@gmail.com' ||
+        normalizedEmail === 'nasrinislam0969661@gmail.com' ||
+        normalizedEmail.includes('superadmin')
+      ) {
         matchedAccount =
+          DEMO_USERS.find((u) => u.email === normalizedEmail) ||
           DEMO_USERS.find((u) => u.email === 'superadmin096@gmail.com') || {
             id: 'sup-001',
             name: 'Super admin',
@@ -102,7 +107,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             role: 'user',
             phone: '+880 1711-234567',
             avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-            membershipPlan: 'standard',
+            membershipPlan: 'free',
             createdAt: '2025-10-15',
             status: 'active',
           };
@@ -115,7 +120,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           role: 'user',
           phone: '+880 1700-000000',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face',
-          membershipPlan: 'basic',
+          membershipPlan: 'free',
           createdAt: new Date().toISOString().split('T')[0],
           status: 'active',
         };
@@ -180,7 +185,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             type="button"
             onClick={handleGoogleAuth}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition-all"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition-all cursor-pointer"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path

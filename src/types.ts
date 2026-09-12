@@ -15,6 +15,13 @@ export interface UserAccount {
   assignedAdminName?: string;
 }
 
+export interface FamilyMember {
+  id?: string;
+  name: string;
+  relationship: string;
+  profession: string;
+}
+
 export interface MatrimonialProfile {
   id: string;
   userId: string;
@@ -45,6 +52,7 @@ export interface MatrimonialProfile {
   presentCountry: string;
   presentCity: string;
   presentAddress: string;
+  permanentCountry?: string;
   permanentDistrict: string;
   permanentAddress: string;
   citizenshipStatus?: string; // e.g., Citizen, PR, Work Permit
@@ -54,12 +62,13 @@ export interface MatrimonialProfile {
   fatherProfession: string;
   motherName: string;
   motherProfession: string;
-  brotherCount: number;
+  familyMembers?: FamilyMember[];
+  brotherCount?: number;
   brotherDetails?: string;
-  sisterCount: number;
+  sisterCount?: number;
   sisterDetails?: string;
-  familyValues: 'Traditional' | 'Moderate' | 'Liberal' | 'Religious';
-  economicStatus: 'Middle Class' | 'Upper Middle Class' | 'Affluent' | 'High Net Worth';
+  familyValues?: 'Traditional' | 'Moderate' | 'Liberal' | 'Religious';
+  economicStatus?: 'Middle Class' | 'Upper Middle Class' | 'Affluent' | 'High Net Worth';
   familyNotes?: string;
 
   // Partner Preferences
@@ -82,6 +91,11 @@ export interface MatrimonialProfile {
   bioBangla?: string;
   lastActive: string;
   registeredDate: string;
+  phone?: string;
+  assignedAdminId?: string;
+  assignedAdminName?: string;
+  membershipPlan?: 'free' | 'basic' | 'standard' | 'special';
+  birthYear?: number;
 }
 
 export interface Proposal {
@@ -187,4 +201,76 @@ export interface ReviewPost {
     groomName?: string;
     weddingLocation?: string;
   };
+}
+
+export interface HeroMobileMockup {
+  imageUrl: string;
+  nameAge: string;
+  professionCity: string;
+}
+
+export interface CountryCardSetting {
+  id: string;
+  name: string;
+  flag: string;
+  cityName: string;
+  highlight: string;
+  image: string;
+  candidateCount: string;
+}
+
+export interface SiteSettings {
+  // Notice bar
+  noticeEnabled: boolean;
+  noticeText: string;
+  noticeBadge: string;
+  
+  // Contact & Hotline
+  helplinePhone1: string;
+  helplinePhone2: string;
+  whatsappNumber: string;
+  supportEmail: string;
+  officeAddress: string;
+  
+  // Payment accounts
+  bkashNumber: string;
+  nagadNumber: string;
+  rocketNumber: string;
+  paymentNotice: string;
+  
+  // Hero & Metrics
+  heroHeadline: string;
+  heroHighlight: string;
+  heroSubtitle: string;
+  statProfilesCount: string;
+  statWeddingsCount: string;
+  statTrustBadge: string;
+
+  // Hero Right Side 3 Mobile Mockup Frames
+  heroLeftPhone: HeroMobileMockup;
+  heroCenterPhone: HeroMobileMockup;
+  heroRightPhone: HeroMobileMockup;
+
+  // Featured Profiles Section
+  featuredSectionTitle: string;
+  featuredSectionSubtitle: string;
+  featuredProfileIds: string[];
+
+  // Membership Section
+  membershipSectionTitle: string;
+  membershipSectionSubtitle: string;
+
+  // Country & Expat Community Section
+  countrySectionTitle: string;
+  countrySectionSubtitle: string;
+  countryCards: CountryCardSetting[];
+
+  // Callback / VIP Consultation Section
+  callbackTitle: string;
+  callbackSubtitle: string;
+  callbackPhone: string;
+  callbackCounselor: string;
+  callbackButtonText: string;
+  authorityDeskHours: string;
+  authorityDeskTagline: string;
 }

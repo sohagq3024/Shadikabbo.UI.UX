@@ -9,11 +9,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
+import { SiteSettings } from '../../types';
+
 interface HeroSectionProps {
   onSearch: (filters: { gender: string; minAge: number; maxAge: number; country: string }) => void;
   onOpenRegister: () => void;
   onOpenLogin: () => void;
   isLoggedIn?: boolean;
+  siteSettings?: SiteSettings;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -21,6 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenRegister,
   onOpenLogin,
   isLoggedIn = false,
+  siteSettings,
 }) => {
   const { showToast } = useToast();
   const [lookingFor, setLookingFor] = useState<'Female' | 'Male'>('Female');
@@ -118,8 +122,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   {/* Inner Screen: Just Photo & 2-Line Text Overlay */}
                   <div className="relative w-full h-full rounded-[18px] sm:rounded-[20px] overflow-hidden bg-slate-950">
                     <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
-                      alt="Tariqur Rahman - Matrimonial Groom"
+                      src={siteSettings?.heroLeftPhone?.imageUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"}
+                      alt={siteSettings?.heroLeftPhone?.nameAge || "Left candidate"}
                       className="w-full h-full object-cover"
                     />
                     {/* Dark gradient at the bottom for text contrast */}
@@ -128,10 +132,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     {/* Bottom 2-Line Text Overlay */}
                     <div className="absolute bottom-2 inset-x-2 sm:bottom-2.5 sm:inset-x-2.5 text-left">
                       <p className="text-[10px] sm:text-[11px] font-bold text-white leading-tight">
-                        Tariqur Rahman, 29
+                        {siteSettings?.heroLeftPhone?.nameAge || "Tariqur Rahman, 29"}
                       </p>
                       <p className="text-[8.5px] sm:text-[9px] text-slate-300 truncate mt-0.5 font-normal">
-                        Sr. Architect • London, UK
+                        {siteSettings?.heroLeftPhone?.professionCity || "Sr. Architect • London, UK"}
                       </p>
                     </div>
                   </div>
@@ -145,8 +149,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   {/* Inner Screen: Just Photo & 2-Line Text Overlay */}
                   <div className="relative w-full h-full rounded-[20px] sm:rounded-[24px] overflow-hidden bg-slate-950">
                     <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
-                      alt="Dr. Anika Tabassum - Matrimonial Bride"
+                      src={siteSettings?.heroCenterPhone?.imageUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"}
+                      alt={siteSettings?.heroCenterPhone?.nameAge || "Featured Bride"}
                       className="w-full h-full object-cover object-center"
                     />
                     {/* Dark gradient at the bottom for text contrast */}
@@ -155,10 +159,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     {/* Bottom 2-Line Text Overlay */}
                     <div className="absolute bottom-2.5 inset-x-2.5 sm:bottom-3.5 sm:inset-x-3 text-left">
                       <p className="text-[11px] sm:text-sm font-bold text-white leading-tight">
-                        Dr. Anika Tabassum, 26
+                        {siteSettings?.heroCenterPhone?.nameAge || "Dr. Anika Tabassum, 26"}
                       </p>
                       <p className="text-[9.5px] sm:text-[11px] text-slate-300 truncate mt-0.5 font-normal">
-                        Doctor (MBBS) • Dhaka, Bangladesh
+                        {siteSettings?.heroCenterPhone?.professionCity || "Doctor (MBBS) • Dhaka, Bangladesh"}
                       </p>
                     </div>
                   </div>
@@ -172,8 +176,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   {/* Inner Screen: Just Photo & 2-Line Text Overlay */}
                   <div className="relative w-full h-full rounded-[18px] sm:rounded-[20px] overflow-hidden bg-slate-950">
                     <img
-                      src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80"
-                      alt="Nusrat Jahan - Matrimonial Candidate"
+                      src={siteSettings?.heroRightPhone?.imageUrl || "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80"}
+                      alt={siteSettings?.heroRightPhone?.nameAge || "Right candidate"}
                       className="w-full h-full object-cover"
                     />
                     {/* Dark gradient at the bottom for text contrast */}
@@ -182,10 +186,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     {/* Bottom 2-Line Text Overlay */}
                     <div className="absolute bottom-2 inset-x-2 sm:bottom-2.5 sm:inset-x-2.5 text-left">
                       <p className="text-[10px] sm:text-[11px] font-bold text-white leading-tight">
-                        Nusrat Jahan, 24
+                        {siteSettings?.heroRightPhone?.nameAge || "Nusrat Jahan, 24"}
                       </p>
                       <p className="text-[8.5px] sm:text-[9px] text-slate-300 truncate mt-0.5 font-normal">
-                        Lecturer in English • Chittagong
+                        {siteSettings?.heroRightPhone?.professionCity || "Lecturer in English • Chittagong"}
                       </p>
                     </div>
                   </div>
@@ -314,21 +318,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Heading, Actions & Reassurance: Only shown in left column on Desktop (hidden on mobile to eliminate empty space and pull content up) */}
-          <div className="hidden lg:block lg:order-1 lg:col-span-6 space-y-5 sm:space-y-6 lg:space-y-7 text-center lg:text-left pt-2 lg:pt-0">
+          {/* Heading, Actions & Reassurance: Order 3 on mobile (under search), Order 1 on Desktop */}
+          <div className="order-3 lg:order-1 lg:col-span-6 space-y-4 sm:space-y-6 lg:space-y-7 text-center lg:text-left pt-4 lg:pt-0">
             {/* Main Headline with High-Contrast Bold Typography */}
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight font-display leading-[1.15] text-white">
-              Where Dignified Hearts & Families{' '}
+            <h1 className="text-xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight font-display leading-[1.15] text-white">
+              {siteSettings?.heroHeadline || 'Where Dignified Hearts & Families'}{' '}
               <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#FFA3AC] to-[#FF2B44]">
-                Unite For A Lifetime
+                {siteSettings?.heroHighlight || 'Unite For A Lifetime'}
               </span>
             </h1>
 
-            {/* Primary Action Buttons - ONLY SHOWN ON DESKTOP WEB (hidden lg:flex), HIDDEN ON MOBILE */}
-            <div className="hidden lg:flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
+            {/* Primary Action Buttons */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
               <button
                 onClick={onOpenRegister}
-                className="relative group overflow-hidden bg-gradient-to-r from-[#E60000] via-[#FF1A38] to-[#D91B2B] text-white px-8 sm:px-9 py-4 rounded-xl font-extrabold text-sm sm:text-base shadow-xl shadow-red-600/40 hover:shadow-2xl hover:shadow-red-600/60 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 ring-1 ring-red-400/50 flex items-center gap-2.5 cursor-pointer"
+                className="relative group overflow-hidden bg-gradient-to-r from-[#E60000] via-[#FF1A38] to-[#D91B2B] text-white px-6 sm:px-9 py-3 sm:py-4 rounded-xl font-extrabold text-xs sm:text-base shadow-xl shadow-red-600/40 hover:shadow-2xl hover:shadow-red-600/60 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 ring-1 ring-red-400/50 flex items-center gap-2 cursor-pointer"
               >
                 {/* Light sweep animation */}
                 <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/35 to-transparent animate-light-sweep pointer-events-none" />
@@ -338,7 +342,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               <button
                 onClick={onOpenLogin}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-7 py-4 rounded-xl font-bold text-sm sm:text-base backdrop-blur-md shadow-md transition-all duration-200 hover:border-white/50 cursor-pointer"
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-bold text-xs sm:text-base backdrop-blur-md shadow-md transition-all duration-200 hover:border-white/50 cursor-pointer"
               >
                 Member Log In
               </button>
@@ -351,17 +355,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="font-semibold text-white">25,000+ Verified Candidates</span>
+                <span className="font-semibold text-white">{siteSettings?.statProfilesCount || '25,000+ Verified Candidates'}</span>
               </div>
               <div className="h-3.5 w-px bg-white/20 hidden sm:block" />
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="text-slate-200">100% NID & Family Privacy</span>
+                <span className="text-slate-200">{siteSettings?.statTrustBadge || '100% NID & Family Privacy'}</span>
               </div>
               <div className="h-3.5 w-px bg-white/20 hidden sm:block" />
               <div className="flex items-center gap-1.5">
                 <Heart className="w-3.5 h-3.5 text-rose-400 shrink-0 fill-rose-400/50" />
-                <span className="text-slate-200">4,850+ Weddings</span>
+                <span className="text-slate-200">{siteSettings?.statWeddingsCount || '4,850+ Weddings'}</span>
               </div>
             </div>
           </div>

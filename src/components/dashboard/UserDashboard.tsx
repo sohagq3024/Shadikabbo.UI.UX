@@ -18,14 +18,19 @@ import {
   MapPin,
   Clock,
   MessageCircle,
+  Lock,
 } from 'lucide-react';
 import { useToast } from '../common/Toast';
+import { BrandLogo } from '../common/BrandLogo';
+import { EditBiodataSection } from './EditBiodataSection';
+import { ShadikabboLiveChatModal } from './ShadikabboLiveChatModal';
 
 interface UserDashboardProps {
   currentUser: UserAccount;
   myProfile: MatrimonialProfile;
   proposals: ProposalItem[];
   allProfiles: MatrimonialProfile[];
+  initialTab?: 'overview' | 'proposals' | 'edit-profile' | 'counselor';
   onUpdateProfile: (updated: MatrimonialProfile) => void;
   onOpenUpgrade: () => void;
   onViewProfile: (profile: MatrimonialProfile) => void;
@@ -38,6 +43,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   myProfile,
   proposals,
   allProfiles,
+  initialTab = 'overview',
   onUpdateProfile,
   onOpenUpgrade,
   onViewProfile,
@@ -45,52 +51,23 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   onDeclineProposal,
 }) => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'overview' | 'proposals' | 'edit-profile' | 'counselor'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'proposals' | 'edit-profile' | 'counselor'>(
+    initialTab || 'overview'
+  );
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [proposalSubTab, setProposalSubTab] = useState<'received' | 'sent'>('received');
+  const [isLiveChatOpen, setIsLiveChatOpen] = useState(false);
+  const helplineNumber = '+8801711009988';
+  const helplineDisplay = '+880 1711-009988';
 
   // Filter proposals involving this user
   const sentProposals = proposals.filter((p) => p.senderProfileId === myProfile.profileId);
   const receivedProposals = proposals.filter((p) => p.receiverProfileId === myProfile.profileId);
-
-  // Edit profile state
-  const [editFormData, setEditFormData] = useState({
-    name: myProfile.name,
-    profession: myProfile.profession,
-    jobTitle: myProfile.jobTitle,
-    companyOrSector: myProfile.companyOrSector,
-    monthlyIncome: myProfile.monthlyIncome || '',
-    presentAddress: myProfile.presentAddress,
-    fatherProfession: myProfile.fatherProfession,
-    motherProfession: myProfile.motherProfession,
-    familyNotes: myProfile.familyNotes || '',
-    bio: myProfile.bio,
-    partnerMinAge: myProfile.partnerMinAge,
-    partnerMaxAge: myProfile.partnerMaxAge,
-    partnerProfession: myProfile.partnerProfession.join(', '),
-  });
-
-  const handleSaveProfileEdit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const updated: MatrimonialProfile = {
-      ...myProfile,
-      name: editFormData.name,
-      profession: editFormData.profession,
-      jobTitle: editFormData.jobTitle,
-      companyOrSector: editFormData.companyOrSector,
-      monthlyIncome: editFormData.monthlyIncome,
-      presentAddress: editFormData.presentAddress,
-      fatherProfession: editFormData.fatherProfession,
-      motherProfession: editFormData.motherProfession,
-      familyNotes: editFormData.familyNotes,
-      bio: editFormData.bio,
-      partnerMinAge: editFormData.partnerMinAge,
-      partnerMaxAge: editFormData.partnerMaxAge,
-      partnerProfession: editFormData.partnerProfession.split(',').map((s) => s.trim()),
-    };
-    onUpdateProfile(updated);
-    showToast('Biodata Updated', 'Your matrimonial profile changes have been successfully saved.', 'success');
-    setActiveTab('overview');
-  };
 
   const getProfileByCandidateId = (candId: string) => {
     return allProfiles.find((p) => p.profileId === candId);
@@ -126,8 +103,25 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                 {myProfile.profession} • {myProfile.presentCity}, {myProfile.presentCountry}
               </p>
               <div className="flex items-center gap-2 pt-1 text-xs">
-                <span className="inline-flex items-center gap-1 font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
-                  Plan: <strong className="capitalize text-[#16205B]">{currentUser.membershipPlan}</strong>
+                <span
+                  id="user-membership-plan-badge"
+                  className={`inline-flex items-center gap-1.5 font-semibold px-2.5 py-0.5 rounded-md ${
+                    currentUser.membershipPlan === 'free'
+                      ? 'bg-amber-50 text-amber-900 border border-amber-200/90'
+                      : 'bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  Plan:
+                  {currentUser.membershipPlan === 'free' ? (
+                    <strong className="text-amber-800 font-bold flex items-center gap-1">
+                      Free
+                      <span className="text-[10px] font-medium text-amber-700 bg-amber-100/80 px-1.5 py-0.2 rounded">
+                        No Plan Purchased
+                      </span>
+                    </strong>
+                  ) : (
+                    <strong className="capitalize text-[#16205B]">{currentUser.membershipPlan}</strong>
+                  )}
                 </span>
                 <span className="text-slate-300">|</span>
                 <span className="text-emerald-700 font-medium text-[11px] flex items-center gap-1">
@@ -142,14 +136,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setActiveTab('edit-profile')}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Edit3 className="w-4 h-4 text-slate-500" />
-              <span>Edit Biodata</span>
+              <span>Edit Profile</span>
             </button>
             <button
               onClick={onOpenUpgrade}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#16205B] to-[#D91B2B] hover:opacity-95 text-white text-xs font-bold shadow-md flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#16205B] to-[#D91B2B] hover:opacity-95 text-white text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Crown className="w-4 h-4 text-amber-300" />
               <span>Upgrade Plan</span>
@@ -157,25 +151,45 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </div>
         </div>
 
-        {/* Dashboard Tabs Bar */}
-        <div className="flex border-b border-slate-200 overflow-x-auto gap-2">
+        {/* Dashboard Tabs Bar - Compact names & 4-column responsive grid (Zero horizontal scroll needed on mobile) */}
+        <div className="grid grid-cols-4 border-b border-slate-200 gap-1 sm:gap-2 bg-slate-100/70 p-1 sm:p-0 sm:bg-transparent rounded-2xl sm:rounded-none">
           {[
-            { id: 'overview', label: 'Dashboard Overview', icon: <Sparkles className="w-4 h-4" /> },
-            { id: 'proposals', label: `Proposals (${receivedProposals.length + sentProposals.length})`, icon: <Send className="w-4 h-4" /> },
-            { id: 'edit-profile', label: 'Edit Biodata', icon: <Edit3 className="w-4 h-4" /> },
-            { id: 'counselor', label: 'My Matchmaker Desk', icon: <PhoneCall className="w-4 h-4" /> },
+            { id: 'overview', label: 'Dashboard', icon: <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> },
+            {
+              id: 'proposals',
+              label: 'Proposals',
+              icon: <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />,
+              count: receivedProposals.length + sentProposals.length,
+            },
+            {
+              id: 'edit-profile',
+              label: 'Edit Profile',
+              icon: <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />,
+            },
+            { id: 'counselor', label: 'Matchmaker', icon: <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3 text-xs font-bold whitespace-nowrap transition-all border-b-2 ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-xs font-bold transition-all rounded-xl sm:rounded-b-none sm:border-b-2 cursor-pointer ${
                 activeTab === tab.id
-                  ? 'border-[#D91B2B] text-[#D91B2B] bg-white rounded-t-xl shadow-2xs'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'bg-white text-[#D91B2B] shadow-xs sm:shadow-none sm:bg-transparent sm:border-[#D91B2B] font-extrabold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 sm:hover:bg-transparent sm:border-transparent'
               }`}
             >
               {tab.icon}
-              <span>{tab.label}</span>
+              <span className="truncate text-center">{tab.label}</span>
+              {tab.count !== undefined && tab.count > 0 && (
+                <span
+                  className={`text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-[#D91B2B] text-white'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -225,12 +239,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                     <Crown className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="text-xl font-bold capitalize text-[#16205B]">{currentUser.membershipPlan}</p>
+                <p className="text-xl font-bold capitalize text-[#16205B]">
+                  {currentUser.membershipPlan === 'free' ? 'Free Plan' : `${currentUser.membershipPlan} Plan`}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {currentUser.membershipPlan === 'free' ? 'No plan purchased yet' : 'Active Paid Package'}
+                </p>
                 <button
                   onClick={onOpenUpgrade}
                   className="text-[11px] text-[#D91B2B] hover:underline font-bold mt-1 inline-block"
                 >
-                  Upgrade to VIP &rarr;
+                  {currentUser.membershipPlan === 'free' ? 'Purchase a Plan →' : 'Upgrade to VIP →'}
                 </button>
               </div>
             </div>
@@ -333,42 +352,95 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                 )}
               </div>
 
-              {/* Right Column: Assigned Matchmaker Desk */}
-              <div className="lg:col-span-4 bg-gradient-to-b from-[#16205B] to-[#0D153B] text-white rounded-3xl p-6 shadow-md space-y-5 flex flex-col justify-between">
+              {/* Right Column: Shadikabbo Official Helpline & Matchmaker Desk */}
+              <div className="lg:col-span-4 bg-gradient-to-br from-[#16205B] via-[#1B2668] to-[#0D153B] text-white rounded-3xl p-6 shadow-lg border border-white/10 space-y-5 flex flex-col justify-between relative overflow-hidden">
+                {/* Decorative subtle ambient glow */}
+                <div className="absolute -top-12 -right-12 w-36 h-36 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
+
                 <div>
-                  <div className="flex items-center gap-2 text-rose-300 text-xs font-bold mb-2">
-                    <PhoneCall className="w-4 h-4" />
-                    <span>Assigned Relationship Officer</span>
+                  {/* Active Status Marker & Shadikabbo Branding Badge */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-400/30 flex items-center gap-1">
+                        Active Support
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-300 bg-white/10 px-2 py-0.5 rounded-md font-mono">
+                      24/7 Helpline
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold font-display">Kabir Hossain</h3>
-                  <p className="text-xs text-slate-300">
-                    Senior Matchmaking Consultant (10+ years experience in Dhaka & Expat marriages)
+
+                  {/* Shadikabbo Brand Highlighting (No individual person name) */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0">
+                      <BrandLogo size="xs" variant="icon-only" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black font-display tracking-tight text-white flex items-center gap-1.5">
+                        Shadikabbo Desk
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      </h3>
+                      <p className="text-xs font-semibold text-rose-300">
+                        শাদী কাব্য অফিসিয়াল রিলেশনশিপ সার্ভিস
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    অভিভাবক আলোচনা, সঠিক পাত্র/পাত্রী নির্বাচন ও বায়োডাটা অনুসন্ধানে শাদী কাব্য টিম সরাসরি সহায়তায় প্রস্তুত।
                   </p>
 
-                  <div className="mt-5 p-4 rounded-2xl bg-white/10 backdrop-blur-md space-y-2 text-xs">
-                    <div className="flex justify-between text-slate-300">
-                      <span>Direct Hotline:</span>
-                      <strong className="text-white font-mono">+880 1711-009988</strong>
+                  {/* Free Plan Guidance Notice */}
+                  {currentUser.membershipPlan === 'free' && (
+                    <div className="mt-3 p-2.5 rounded-xl bg-amber-400/20 border border-amber-300/30 text-[11px] text-amber-200 flex items-start gap-2">
+                      <Lock className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />
+                      <span className="leading-snug">
+                        ফ্রি একাউন্ট: পূর্ণাঙ্গ বায়োডাটা সুবিধার তথ্য জানতে কর্তৃপক্ষের সাথে সরাসরি যোগাযোগ করুন।
+                      </span>
                     </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>Available:</span>
-                      <strong className="text-white">10:00 AM - 8:00 PM</strong>
+                  )}
+
+                  {/* Helpline Details Box */}
+                  <div className="mt-4 p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-300 flex items-center gap-1.5">
+                        <PhoneCall className="w-3.5 h-3.5 text-rose-300" />
+                        সরাসরি হেল্পলাইন:
+                      </span>
+                      <strong className="text-white font-mono text-sm tracking-wide">
+                        {helplineDisplay}
+                      </strong>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-300 text-[11px] pt-1.5 border-t border-white/10">
+                      <span>সেবা সময়:</span>
+                      <span className="text-white font-medium">সকাল ১০:০০ - রাত ১০:০০</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <button
-                    onClick={() => showToast('Counselor Alerted', 'Mr. Kabir Hossain has been notified to phone your contact number.', 'success')}
-                    className="w-full py-2.5 rounded-xl bg-[#D91B2B] hover:bg-[#b91422] text-white font-bold text-xs shadow-md transition-colors"
+                {/* Two Action Buttons: Direct Dialer & Full-Page Live Chat */}
+                <div className="space-y-2.5 pt-2">
+                  {/* Button 1: Request Callback / Direct Mobile Dialer */}
+                  <a
+                    href={`tel:${helplineNumber}`}
+                    className="w-full py-3 rounded-xl bg-[#D91B2B] hover:bg-[#b91422] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-center"
                   >
-                    Request Callback
-                  </button>
+                    <PhoneCall className="w-4 h-4" />
+                    <span>Request Callback (সরাসরি কল করুন)</span>
+                  </a>
+
+                  {/* Button 2: Live Chat - Opens Full Page Jag Board */}
                   <button
-                    onClick={() => setActiveTab('counselor')}
-                    className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition-colors"
+                    type="button"
+                    onClick={() => setIsLiveChatOpen(true)}
+                    className="w-full py-3 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold text-xs sm:text-sm border border-white/20 shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >
-                    Open Counselor Desk
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <span>Live Chat (লাইভ চ্যাট বোর্ড)</span>
                   </button>
                 </div>
               </div>
@@ -557,219 +629,89 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </div>
         )}
 
-        {/* TAB 3: Edit Profile */}
+        {/* TAB 3: Edit Profile (4-Step Comprehensive Biodata Editor) */}
         {activeTab === 'edit-profile' && (
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm animate-in fade-in max-w-4xl">
-            <div className="border-b border-slate-100 pb-4 mb-6">
-              <h3 className="text-lg font-bold text-slate-900 font-display">
-                Update Your Matrimonial Biodata
-              </h3>
-              <p className="text-xs text-slate-500">
-                Keep your credentials accurate to receive genuine, high-compatibility family proposals.
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveProfileEdit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Candidate Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.name}
-                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Profession
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.profession}
-                    onChange={(e) => setEditFormData({ ...editFormData, profession: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Job Title / Designation
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.jobTitle}
-                    onChange={(e) => setEditFormData({ ...editFormData, jobTitle: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Employer / Sector
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.companyOrSector}
-                    onChange={(e) => setEditFormData({ ...editFormData, companyOrSector: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Monthly Income
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.monthlyIncome}
-                    onChange={(e) => setEditFormData({ ...editFormData, monthlyIncome: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Present Address
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.presentAddress}
-                    onChange={(e) => setEditFormData({ ...editFormData, presentAddress: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Father's Profession
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.fatherProfession}
-                    onChange={(e) => setEditFormData({ ...editFormData, fatherProfession: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Candidate Bio & Personality Note
-                </label>
-                <textarea
-                  rows={3}
-                  value={editFormData.bio}
-                  onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Partner Expectations (Preferred Professions)
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.partnerProfession}
-                  onChange={(e) => setEditFormData({ ...editFormData, partnerProfession: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('overview')}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#D91B2B] hover:bg-[#b91422] text-white text-xs font-bold shadow-md"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
+          <EditBiodataSection
+            currentUser={currentUser}
+            myProfile={myProfile}
+            onUpdateProfile={(updated) => {
+              onUpdateProfile(updated);
+            }}
+            onCancel={() => setActiveTab('overview')}
+          />
         )}
 
-        {/* TAB 4: Counselor Desk */}
+        {/* TAB 4: Counselor / Matchmaker Desk */}
         {activeTab === 'counselor' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 animate-in fade-in">
             <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300"
-                alt="Kabir Hossain"
-                className="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow-md ring-1 ring-slate-200"
-              />
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#16205B] to-[#0D153B] flex items-center justify-center p-3 shadow-md border-2 border-white ring-1 ring-slate-200 shrink-0">
+                <BrandLogo size="sm" variant="icon-only" inverted />
+              </div>
               <div className="space-y-1 text-center sm:text-left">
-                <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Official Matchmaker Assigned
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Shadikabbo Matchmaker Support Active
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 font-display">
-                  Kabir Hossain
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 font-display">
+                  Shadikabbo Relationship Desk
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Senior Matrimonial Advisor • Shadikabbo Head Office (Gulshan-2, Dhaka)
+                <p className="text-xs text-slate-500 font-medium">
+                  Official Matchmaking Advisors • Head Office (Gulshan-2, Dhaka)
                 </p>
-                <p className="text-xs text-slate-600 max-w-xl pt-1">
-                  "I am personally dedicated to mediating dignified matchmaking for your family. Feel free to request private biodatas or discuss specific partner preferences anytime."
+                <p className="text-xs text-slate-600 max-w-xl pt-1 leading-relaxed">
+                  "আমাদের টিম সম্মানিত পরিবারবর্গের জন্য নিরাপদ ও মর্যাদাশীল পাত্র-পাত্রী বাছাই এবং অভিভাবক সমন্বয়ে সার্বক্ষণিক কাজ করে। যেকোনো তথ্যে লাইভ চ্যাট অথবা সরাসরি হেল্পলাইনে কল করুন।"
                 </p>
               </div>
             </div>
 
             {/* Counselor Contact Options */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-[#16205B] shadow-2xs">
-                  <PhoneCall className="w-4 h-4" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-[#16205B] shadow-2xs">
+                    <PhoneCall className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-800">Direct Phone Call</h4>
+                  <p className="font-mono text-xs font-bold text-[#D91B2B]">{helplineDisplay}</p>
                 </div>
-                <h4 className="text-xs font-bold text-slate-800">Phone Hotline</h4>
-                <p className="font-mono text-xs font-bold text-[#D91B2B]">+880 1711-009988</p>
-                <button
-                  onClick={() => showToast('Hotline Call', 'Initiating call to +880 1711-009988', 'info')}
-                  className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50"
+                <a
+                  href={`tel:${helplineNumber}`}
+                  className="w-full py-2 bg-[#D91B2B] hover:bg-[#b91422] text-white rounded-xl text-xs font-bold text-center block transition-all shadow-2xs cursor-pointer"
                 >
-                  Call Counselor
+                  Call Now (সরাসরি কল)
+                </a>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
+                    <MessageCircle className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-800">Live Support Chat</h4>
+                  <p className="text-xs text-emerald-700 font-semibold">● Active Board (অনলাইন)</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLiveChatOpen(true)}
+                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                >
+                  Open Live Chat Board
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
-                  <MessageCircle className="w-4 h-4" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#16205B] flex items-center justify-center shadow-2xs">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-800">Office Appointment</h4>
+                  <p className="text-xs text-slate-500">Gulshan-2, Dhaka-1212</p>
                 </div>
-                <h4 className="text-xs font-bold text-slate-800">Official WhatsApp</h4>
-                <p className="font-mono text-xs font-bold text-emerald-700">+880 1711-009988</p>
                 <button
-                  onClick={() => showToast('WhatsApp Connected', 'Opening official counselor WhatsApp channel...', 'success')}
-                  className="w-full py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700"
-                >
-                  Chat on WhatsApp
-                </button>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#D91B2B] flex items-center justify-center shadow-2xs">
-                  <Calendar className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-slate-800">Office Appointment</h4>
-                <p className="text-xs text-slate-500">Gulshan-2, Dhaka-1212</p>
-                <button
+                  type="button"
                   onClick={() => showToast('Appointment Requested', 'Our front desk will contact you to confirm a meeting at the Gulshan office.', 'info')}
-                  className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50"
+                  className="w-full py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-all cursor-pointer"
                 >
                   Book Office Visit
                 </button>
@@ -778,6 +720,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Full Page Shadikabbo Live Chat Board Modal */}
+      <ShadikabboLiveChatModal
+        isOpen={isLiveChatOpen}
+        onClose={() => setIsLiveChatOpen(false)}
+        helplineNumber={helplineNumber}
+        userName={currentUser.name}
+      />
     </div>
   );
 };
